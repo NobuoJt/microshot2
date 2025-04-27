@@ -17,15 +17,14 @@ var require_package = __commonJS({
   "package.json"(exports2, module2) {
     module2.exports = {
       name: "microshot",
-      version: "2.0.1_j",
+      version: "2.0.1_k",
       description: "Take some screen shot. and detect difference.",
       main: "index.js",
       scripts: {
         start: "npm run build:live",
         build: "tsc -p .",
         "build:live": `nodemon --watch 'index.ts' --exec "ts-node" index.ts & tsc -p .`,
-        oneFile: '".\\node_modules\\.bin\\esbuild" --bundle index.js --outfile=out.js --platform=node --external:*.node',
-        compile: "tsc index.ts & node --experimental-sea-config sea-config.json & powershell -c Copy-Item (command node -Syntax) app_onNode.exe & npx postject app_onNode.exe NODE_SEA_BLOB sea-prep.blob --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2"
+        oneFile: '".\\node_modules\\.bin\\esbuild" --bundle index.js --outfile=out.js --platform=node --external:*.node'
       },
       keywords: [
         "screenshot"

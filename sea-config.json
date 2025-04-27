@@ -1,1 +1,1 @@
-{ "main": "index.js", "output": "sea-prep.blob" }
+{ "main": "out.js", "output": "sea-prep.blob" }
