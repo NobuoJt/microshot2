@@ -1,0 +1,50 @@
+{
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "$ref": "#/definitions/Empty",
+    "definitions": {
+        "Empty": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "DISCORD_POST_URL": {
+                    "type": "string",
+                    "format": "uri",
+                    "qt-uri-protocols": [
+                        "https"
+                    ]
+                },
+                "TARGET_WINDOW": {
+                    "$ref": "#/definitions/TargetWindow"
+                }
+            },
+            "required": [
+                "DISCORD_POST_URL",
+                "TARGET_WINDOW"
+            ],
+            "title": "Empty"
+        },
+        "TargetWindow": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "ONE_SHOT": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "AUTO": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "required": [
+                "AUTO",
+                "ONE_SHOT"
+            ],
+            "title": "TargetWindow"
+        }
+    }
+}

@@ -2,5 +2,13 @@
     "cSpell.words": [
         "microshot",
         "postject"
+    ],
+    "json.schemas": [
+        {
+            "fileMatch": [
+            "/**/.secret.json"
+            ],
+            "url": "./schema/s.schema.json"
+        }
     ]
 }
