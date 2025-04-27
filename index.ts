@@ -32,7 +32,6 @@ console.log("'L' key to print window List.\n'R Ctrl' to Capture.\n'F10' to start
 
 
 keyboard.addListener((event:any) => {//キーボードイベント割り込み(フォーカス無視)
-    //console.log(event); //キーイベント表示
     if (event.name === 'ESCAPE' && event.state === 'DOWN') {
         console.log('Esc key pressed, exiting...');
         process.exit();
@@ -97,11 +96,9 @@ setInterval(() => {
             
             if(item.appName==tg_window){
                 let image=item.captureImageSync()
-                //let filename = `pix/${item.appName}_${date.toLocaleString().replace(/\//g,"_").replace(/:/g,"_")}.png`
                 let result
                 if(prevImage.get(i)!==undefined){
                     result = await looksSame(prevImage.get(i),image.toPngSync()),{tolerance:5}
-                    //console.log(result?.equal)
                     if(!result?.equal){
                         try{
                             const formData = new FormData()
