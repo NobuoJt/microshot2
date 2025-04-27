@@ -1,6 +1,6 @@
 {
   "name": "microshot",
-  "version": "2.0.0_i",
+  "version": "2.0.1_j",
   "description": "Take some screen shot. and detect difference.",
   "main": "index.js",
   "scripts": {
@@ -16,6 +16,7 @@
   "license": "ISC",
   "dependencies": {
     "@types/node": "^22.13.14",
+    "esbuild": "^0.25.3",
     "looks-same": "^9.0.1",
     "microshot": "file:",
     "node-global-key-listener": "^0.3.0",
