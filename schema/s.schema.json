@@ -15,11 +15,15 @@
                 },
                 "TARGET_WINDOW": {
                     "$ref": "#/definitions/TargetWindow"
+                },
+                "TOLERANCE":{
+                    "type":"number"
                 }
             },
             "required": [
                 "DISCORD_POST_URL",
-                "TARGET_WINDOW"
+                "TARGET_WINDOW",
+                "TOLERANCE"
             ],
             "title": "Empty"
         },

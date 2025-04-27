@@ -17,7 +17,7 @@ const version=packageJson.version
 
 let prevImage=new Map();
 
-interface config {"DISCORD_POST_URL":string,"TARGET_WINDOW":{"ONE_SHOT":string[],"AUTO":string[]}}
+interface config {"DISCORD_POST_URL":string,"TARGET_WINDOW":{"ONE_SHOT":string[],"AUTO":string[]},"TOLERANCE":number}
 
 const configObj:config=JSON.parse(fs.readFileSync(__dirname+"/.secret.json").toString())
 
@@ -99,7 +99,7 @@ setInterval(() => {
                 let image=item.captureImageSync()
                 let result
                 if(prevImage.get(i)!==undefined){
-                    result = await looksSame(prevImage.get(i),image.toPngSync(),{tolerance:17,ignoreAntialiasing:false,antialiasingTolerance:3})
+                    result = await looksSame(prevImage.get(i),image.toPngSync(),{tolerance:configObj?.TOLERANCE,ignoreAntialiasing:false,antialiasingTolerance:3})
                     if(!result?.equal){
                         try{
                             const formData = new FormData()
