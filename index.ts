@@ -17,10 +17,11 @@ const version=packageJson.version
 
 let prevImage=new Map();
 
-const urlObj=JSON.parse(fs.readFileSync(__dirname+"/url.secret").toString())
+interface config {"DISCORD_POST_URL":string,"TARGET_WINDOW":{"ONE_SHOT":string[],"AUTO":string[]}}
 
-const URL=urlObj.discord
-console.log(URL)
+const configObj:config=JSON.parse(fs.readFileSync(__dirname+"/.secret.json").toString())
+
+const URL=configObj?.DISCORD_POST_URL
 
 let windows = screenshots.Window.all();
 const keyboard = new GlobalKeyboardListener();
@@ -64,7 +65,7 @@ keyboard.addListener((event:any) => {//キーボードイベント割り込み(�
     let date=new Date()
     if (event.name === 'RIGHT CTRL' && event.state === 'DOWN') {//右コントロール　スクショ
 
-        readFileSync(__dirname+"/targetWindows.secret",{encoding:"utf-8"}).split("\r\n").forEach((tg_window,i,a)=>{
+        configObj?.TARGET_WINDOW?.ONE_SHOT?.forEach((tg_window)=>{
             windows.forEach((item:any) => {
                 if(item.appName==tg_window){
                     let image=item.captureImageSync()
@@ -91,7 +92,7 @@ keyboard.addListener((event:any) => {//キーボードイベント割り込み(�
 setInterval(() => {
     if(!auto_diff_flag){return}
     
-    readFileSync(__dirname+"/targetAutoWindows.secret",{encoding:"utf-8"}).split("\r\n").forEach((tg_window,i,a)=>{
+    configObj?.TARGET_WINDOW?.AUTO?.forEach((tg_window)=>{
         windows.forEach(async (item:any,i:Number) => {
             
             if(item.appName==tg_window){
