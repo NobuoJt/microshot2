@@ -5,12 +5,12 @@ const requireFromDisk = createRequire(__filename);
 import packageJson from "./package.json"
 
 //import { screenshots } from 'node-screenshots';
-const screenshots = requireFromDisk('C:\\Users\\user\\Desktop\\開発\\microShot\\node_modules\\node-screenshots\\index.js');
+const screenshots = requireFromDisk(__dirname+'\\node_modules\\node-screenshots\\index.js');
 
-import { GlobalKeyboardListener } from 'node-global-key-listener';
-//const keyboardListener = requireFromDisk('C:\\Users\\user\\Desktop\\開発\\microShot\\node_modules\\node-global-key-listener\\build\\index.js');
-import looksSame from 'looks-same';
-//const looksSame =requireFromDisk('C:\\Users\\user\\Desktop\\開発\\microShot\\node_modules\\looks-same\\index.js');
+//import { GlobalKeyboardListener } from 'node-global-key-listener';
+const GlobalKeyboardListener = requireFromDisk(__dirname+'\\node_modules\\node-global-key-listener\\build\\index.js');
+//import looksSame from 'looks-same';
+const looksSame =requireFromDisk(__dirname+'\\node_modules\\looks-same\\index.js');
 
 const version=packageJson.version
 
@@ -24,7 +24,7 @@ const configObj:config=JSON.parse(fs.readFileSync(__dirname+"/.secret.json").toS
 const URL=configObj?.DISCORD_POST_URL
 
 let windows = screenshots.Window.all();
-const keyboard = new GlobalKeyboardListener();
+const keyboard = new GlobalKeyboardListener.GlobalKeyboardListener();
 let auto_diff_flag=false
 
 console.log(`microShot v${version}`)

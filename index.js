@@ -50,17 +50,17 @@ const module_1 = require("module");
 const requireFromDisk = (0, module_1.createRequire)(__filename);
 const package_json_1 = __importDefault(require("./package.json"));
 //import { screenshots } from 'node-screenshots';
-const screenshots = requireFromDisk('C:\\Users\\user\\Desktop\\開発\\microShot\\node_modules\\node-screenshots\\index.js');
-const node_global_key_listener_1 = require("node-global-key-listener");
-//const keyboardListener = requireFromDisk('C:\\Users\\user\\Desktop\\開発\\microShot\\node_modules\\node-global-key-listener\\build\\index.js');
-const looks_same_1 = __importDefault(require("looks-same"));
-//const looksSame =requireFromDisk('C:\\Users\\user\\Desktop\\開発\\microShot\\node_modules\\looks-same\\index.js');
+const screenshots = requireFromDisk(__dirname + '\\node_modules\\node-screenshots\\index.js');
+//import { GlobalKeyboardListener } from 'node-global-key-listener';
+const GlobalKeyboardListener = requireFromDisk(__dirname + '\\node_modules\\node-global-key-listener\\build\\index.js');
+//import looksSame from 'looks-same';
+const looksSame = requireFromDisk(__dirname + '\\node_modules\\looks-same\\index.js');
 const version = package_json_1.default.version;
 let prevImage = new Map();
 const configObj = JSON.parse(fs.readFileSync(__dirname + "/.secret.json").toString());
 const URL = configObj === null || configObj === void 0 ? void 0 : configObj.DISCORD_POST_URL;
 let windows = screenshots.Window.all();
-const keyboard = new node_global_key_listener_1.GlobalKeyboardListener();
+const keyboard = new GlobalKeyboardListener.GlobalKeyboardListener();
 let auto_diff_flag = false;
 console.log(`microShot v${version}`);
 console.log("'L' key to print window List.\n'R Ctrl' to Capture.\n'F10' to start auto diff notice. 'F9' to stop.\n'Esc' to exit.");
@@ -131,7 +131,7 @@ setInterval(() => {
                 let image = item.captureImageSync();
                 let result;
                 if (prevImage.get(i) !== undefined) {
-                    result = yield (0, looks_same_1.default)(prevImage.get(i), image.toPngSync(), { tolerance: configObj === null || configObj === void 0 ? void 0 : configObj.TOLERANCE, ignoreAntialiasing: false, antialiasingTolerance: 3 });
+                    result = yield looksSame(prevImage.get(i), image.toPngSync(), { tolerance: configObj === null || configObj === void 0 ? void 0 : configObj.TOLERANCE, ignoreAntialiasing: false, antialiasingTolerance: 3 });
                     if (!(result === null || result === void 0 ? void 0 : result.equal)) {
                         try {
                             const formData = new FormData();
