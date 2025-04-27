@@ -1,0 +1,27 @@
+{
+  "name": "microshot",
+  "version": "2.0.0_a",
+  "description": "Take some screen shot. and detect difference.",
+  "main": "index.js",
+  "scripts": {
+    "start": "npm run build:live",
+    "build": "tsc -p .",
+    "build:live": "nodemon --watch 'index.ts' --exec \"ts-node\" index.ts",
+    "compile": "tsc index.ts & node --experimental-sea-config sea-config.json & powershell -c Copy-Item (command node -Syntax) app_onNode.exe & npx postject app_onNode.exe NODE_SEA_BLOB sea-prep.blob --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2"
+  },
+  "keywords": [
+    "screenshot"
+  ],
+  "author": "nobuoJT",
+  "license": "ISC",
+  "dependencies": {
+    "@types/node": "^22.13.14",
+    "looks-same": "^9.0.1",
+    "microshot": "file:",
+    "node-global-key-listener": "^0.3.0",
+    "node-screenshots": "^0.2.1",
+    "nodemon": "^3.1.9",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2"
+  }
+}
