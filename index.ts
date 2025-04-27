@@ -99,7 +99,7 @@ setInterval(() => {
                 let image=item.captureImageSync()
                 let result
                 if(prevImage.get(i)!==undefined){
-                    result = await looksSame(prevImage.get(i),image.toPngSync()),{tolerance:5}
+                    result = await looksSame(prevImage.get(i),image.toPngSync(),{tolerance:17,ignoreAntialiasing:false,antialiasingTolerance:3})
                     if(!result?.equal){
                         try{
                             const formData = new FormData()
