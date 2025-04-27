@@ -1,16 +1,15 @@
 import * as fs from "fs";
 import { existsSync, mkdir, mkdirSync, readFileSync } from "fs";
-import { readFile } from "fs/promises";
-const { createRequire } = require("module");
+import { createRequire } from "module";
 const requireFromDisk = createRequire(__filename);
 
 //import { screenshots } from 'node-screenshots';
 const screenshots = requireFromDisk('C:\\Users\\user\\Desktop\\開発\\microShot\\node_modules\\node-screenshots\\index.js');
 
-//import { GlobalKeyboardListener } from 'node-global-key-listener';
-const keyboardListener = requireFromDisk('C:\\Users\\user\\Desktop\\開発\\microShot\\node_modules\\node-global-key-listener\\build\\index.js');
-//const looksSame =require('looks-same');
-const looksSame =requireFromDisk('C:\\Users\\user\\Desktop\\開発\\microShot\\node_modules\\looks-same\\index.js');
+import { GlobalKeyboardListener } from 'node-global-key-listener';
+//const keyboardListener = requireFromDisk('C:\\Users\\user\\Desktop\\開発\\microShot\\node_modules\\node-global-key-listener\\build\\index.js');
+import looksSame from 'looks-same';
+//const looksSame =requireFromDisk('C:\\Users\\user\\Desktop\\開発\\microShot\\node_modules\\looks-same\\index.js');
 
 const version="1.0.4_0"
 
@@ -22,7 +21,7 @@ const URL=urlObj.discord
 console.log(URL)
 
 let windows = screenshots.Window.all();
-const keyboard = new keyboardListener.GlobalKeyboardListener();
+const keyboard = new GlobalKeyboardListener();
 let auto_diff_flag=false
 
 console.log(`microShot v${version}`)
