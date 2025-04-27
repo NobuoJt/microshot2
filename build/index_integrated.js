@@ -4,19 +4,20 @@ var __commonJS = (cb, mod) => function __require() {
   return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
 };
 
-// package.json
+// build/package.json
 var require_package = __commonJS({
-  "package.json"(exports2, module2) {
+  "build/package.json"(exports2, module2) {
     module2.exports = {
       name: "microshot",
-      version: "2.0.1_k",
+      version: "2.0.1_m",
       description: "Take some screen shot. and detect difference.",
       main: "index.js",
       scripts: {
         start: "npm run build:live",
-        build: "tsc -p .",
         "build:live": `nodemon --watch 'index.ts' --exec "ts-node" index.ts & tsc -p .`,
-        oneFile: '".\\node_modules\\.bin\\esbuild" --bundle index.js --outfile=out.js --platform=node --external:*.node'
+        build_j: "tsc -p .",
+        build_i: '".\\node_modules\\.bin\\esbuild" --bundle index.js --outfile=build/index_integrated.js --platform=node --external:*.node',
+        build_e: "build/compile_exe.ps1"
       },
       keywords: [
         "screenshot"
@@ -38,7 +39,7 @@ var require_package = __commonJS({
   }
 });
 
-// index.js
+// build/index.js
 var __createBinding = exports && exports.__createBinding || (Object.create ? function(o, m, k, k2) {
   if (k2 === void 0) k2 = k;
   var desc = Object.getOwnPropertyDescriptor(m, k);
