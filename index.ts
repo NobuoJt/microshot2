@@ -2,6 +2,7 @@ import * as fs from "fs";
 import { existsSync, mkdir, mkdirSync, readFileSync } from "fs";
 import { createRequire } from "module";
 const requireFromDisk = createRequire(__filename);
+import packageJson from "./package.json"
 
 //import { screenshots } from 'node-screenshots';
 const screenshots = requireFromDisk('C:\\Users\\user\\Desktop\\開発\\microShot\\node_modules\\node-screenshots\\index.js');
@@ -11,7 +12,8 @@ import { GlobalKeyboardListener } from 'node-global-key-listener';
 import looksSame from 'looks-same';
 //const looksSame =requireFromDisk('C:\\Users\\user\\Desktop\\開発\\microShot\\node_modules\\looks-same\\index.js');
 
-const version="1.0.4_0"
+const version=packageJson.version
+
 
 let prevImage=new Map();
 
