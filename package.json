@@ -1,16 +1,16 @@
 {
   "name": "microshot",
-  "version": "2.0.1_q",
+  "version": "2.0.1_r",
   "description": "Take some screen shot. and detect difference.",
   "main": "index.js",
   "scripts": {
     "start": "npm run build:live",
     "build:live": "nodemon --watch 'index.ts' --exec \"ts-node\" index.ts & tsc -p .",
     "build_j": "tsc -p .",
-    "build_i":"\".\\node_modules\\.bin\\esbuild\" --bundle build/index.js --outfile=build/index_integrated.js --platform=node --external:*.node",
-    "build_e":"powershell -c build\\compile_exe.ps1",
-    "build_after":"powershell -c build\\getNativeModule_4minimum.ps1",
-    "compile":"npm run build_j && npm run build_i && npm run build_e && npm run build_after"
+    "build_i": "\".\\node_modules\\.bin\\esbuild\" --bundle build/index.js --outfile=build/index_integrated.js --platform=node --external:*.node",
+    "build_e": "powershell -c build\\compile_exe.ps1",
+    "build_after": "powershell -c build\\getNativeModule_4minimum.ps1",
+    "compile": "npm run build_j && npm run build_i && npm run build_e && npm run build_after"
   },
   "keywords": [
     "screenshot"
@@ -19,6 +19,7 @@
   "license": "ISC",
   "dependencies": {
     "@types/node": "^22.13.14",
+    "console-log-colors": "^0.5.0",
     "esbuild": "^0.25.3",
     "looks-same": "^9.0.1",
     "microshot": "file:",
