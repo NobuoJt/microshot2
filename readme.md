@@ -7,6 +7,8 @@ CLIです。
 
 continue from [microShot(Legacy)](https://github.com/NobuoJt/microShot/blob/main/readme.md) (Private Repo)
 
+![screenshot](pix/image.png)
+
 ## Usage
 ```ts-node index.ts``` or 
 ```dist/microShot.exe```
