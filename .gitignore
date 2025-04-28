@@ -1,4 +1,5 @@
 *.secret
+*.secret.json
 *.jpg
 *.jpeg
 *.png

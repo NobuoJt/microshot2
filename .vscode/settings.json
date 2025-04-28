@@ -1,6 +1,19 @@
 {
     "cSpell.words": [
+        "cspotcode",
+        "dominictarr",
+        "jridgewell",
         "microshot",
-        "postject"
+        "Mikeal",
+        "postject",
+        "Ridgewell"],
+    "cSpell.ignorePaths":["**/node_modules/**","license_detail/**"],
+    "json.schemas": [
+        {
+            "fileMatch": [
+            "/**/.secret.json"
+            ],
+            "url": "./schema/s.schema.json"
+        }
     ]
 }

@@ -1,13 +1,16 @@
 {
   "name": "microshot",
-  "version": "2.0.0_a",
+  "version": "2.0.2_v",
   "description": "Take some screen shot. and detect difference.",
   "main": "index.js",
   "scripts": {
     "start": "npm run build:live",
-    "build": "tsc -p .",
-    "build:live": "nodemon --watch 'index.ts' --exec \"ts-node\" index.ts",
-    "compile": "tsc index.ts & node --experimental-sea-config sea-config.json & powershell -c Copy-Item (command node -Syntax) app_onNode.exe & npx postject app_onNode.exe NODE_SEA_BLOB sea-prep.blob --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2"
+    "build:live": "nodemon --watch 'index.ts' --exec \"ts-node\" index.ts & tsc -p .",
+    "build_j": "tsc -p .",
+    "build_i": "\".\\node_modules\\.bin\\esbuild\" --bundle build/index.js --outfile=build/index_integrated.js --platform=node --external:*.node",
+    "build_e": "powershell -c build\\compile_exe.ps1",
+    "build_after": "powershell -c build\\getNativeModule_4minimum.ps1",
+    "compile": "npm run build_j && npm run build_i && npm run build_e && npm run build_after"
   },
   "keywords": [
     "screenshot"
@@ -16,8 +19,10 @@
   "license": "ISC",
   "dependencies": {
     "@types/node": "^22.13.14",
+    "console-log-colors": "^0.5.0",
+    "esbuild": "^0.25.3",
+    "license-checker": "^25.0.1",
     "looks-same": "^9.0.1",
-    "microshot": "file:",
     "node-global-key-listener": "^0.3.0",
     "node-screenshots": "^0.2.1",
     "nodemon": "^3.1.9",

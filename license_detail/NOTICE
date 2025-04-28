@@ -1,0 +1,103 @@
+This project includes software and assets licensed under various open-source licenses.
+
+---
+
+The following components are licensed under the Apache License 2.0:
+Apache License 2.0 (https://www.apache.org/licenses/LICENSE-2.0)
+
+ b4a@1.6.7
+    licenses: Apache-2.0
+    repository: https://github.com/holepunchto/b4a
+    publisher: Holepunch
+
+ bare-events@2.5.4
+    licenses: Apache-2.0
+    repository: https://github.com/holepunchto/bare-events
+    publisher: Holepunch
+
+ bare-fs@4.0.2
+    licenses: Apache-2.0
+    repository: https://github.com/holepunchto/bare-fs
+    publisher: Holepunch
+
+ bare-os@3.6.1
+    licenses: Apache-2.0
+    repository: https://github.com/holepunchto/bare-os
+    publisher: Holepunch
+
+ bare-path@3.0.0
+    licenses: Apache-2.0
+    repository: https://github.com/holepunchto/bare-path
+    publisher: Holepunch
+    path: C:\Users\user\Desktop\開発\microshot\node_modules\bare-path
+
+ bare-stream@2.6.5
+    licenses: Apache-2.0
+    repository: https://github.com/holepunchto/bare-stream
+    publisher: Holepunch
+
+ detect-libc@2.0.3
+    licenses: Apache-2.0
+    repository: https://github.com/lovell/detect-libc
+    publisher: Lovell Fuller
+    email: npm@lovell.info
+
+ node-screenshots-win32-x64-msvc@0.2.1
+    licenses: Apache-2.0
+
+ node-screenshots@0.2.1
+    licenses: Apache-2.0
+
+ rc@1.2.8
+    licenses: (BSD-2-Clause OR MIT OR Apache-2.0)
+    repository: https://github.com/dominictarr/rc
+    publisher: Dominic Tarr
+    email: dominic.tarr@gmail.com
+    url: dominictarr.com
+
+ sharp@0.32.6
+    licenses: Apache-2.0
+    repository: https://github.com/lovell/sharp
+    publisher: Lovell Fuller
+    email: npm@lovell.info
+
+ spdx-correct@3.2.0
+    licenses: Apache-2.0
+    repository: https://github.com/jslicense/spdx-correct.js
+
+ text-decoder@1.2.3
+    licenses: Apache-2.0
+    repository: https://github.com/holepunchto/text-decoder
+    publisher: Holepunch
+
+ tunnel-agent@0.6.0
+    licenses: Apache-2.0
+    repository: https://github.com/mikeal/tunnel-agent
+    publisher: Mikeal Rogers
+    email: mikeal.rogers@gmail.com
+    url: http://www.futurealoof.com
+
+ typescript@5.8.2
+    licenses: Apache-2.0
+    repository: https://github.com/microsoft/TypeScript
+    publisher: Microsoft Corp.
+
+ validate-npm-package-license@3.0.4
+    licenses: Apache-2.0
+    repository: https://github.com/kemitchell/validate-npm-package-license.js
+    publisher: Kyle E. Mitchell
+    email: kyle@kemitchell.com
+    url: https://kemitchell.com
+---
+
+The following assets are licensed under the Creative Commons Attribution 3.0 License:
+
+ spdx-exceptions@2.5.0
+    licenses: CC-BY-3.0
+    repository: https://github.com/kemitchell/spdx-exceptions.json
+    publisher: The Linux Foundation
+
+ spdx-ranges@2.1.1
+    licenses: (MIT AND CC-BY-3.0)
+    repository: https://github.com/kemitchell/spdx-ranges.js
+    publisher: The Linux Foundation
