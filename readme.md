@@ -1,25 +1,17 @@
-# microShot : screen shot tool
-v1.0.4
+# microShot2 : screen shot tool
+v2.0.1_n
 
 オフフォーカス、1keyでウィンドウのスクショ画像を撮影。  
-指定秒数ずつ差分をとり差分が大きい場合はdiscordに通知する。
+指定秒数ずつ差分をとり差分が大きい場合はdiscordに通知する。  
+CLIです。
 
-## file setting
+continue from [microShot(Legacy)](https://github.com/NobuoJt/microShot/blob/main/readme.md) (Private Repo)
 
+## Usage
+```ts-node index.ts``` or 
+```dist/microShot.exe```
 
-|||
-|-|-|
-```(root)```  |
-|index.*|ソースファイル|
-|app_onNode.exe |コンパイル後、実行ファイル
- microShot.bat|実行ファイル|
-|pix/```{appName}_{YYYY}_{M}_{D} {h}_{m}_{s}```|　画像ファイルが保存される|  
-targetWindows.secret|　キャプチャーするソフト名を羅列  
-targetAutoWindows.secret|　定期キャプチャーするソフト名を羅列  
-url.secret| json形式{"discord":"https://~"}でwebhookのURLを記入
-
-## usage
-```node index.js```
+## Key Config
 
 ### ```L``` Show window List
 - info by window Table/ appName List
@@ -30,27 +22,79 @@ url.secret| json形式{"discord":"https://~"}でwebhookのURLを記入
 ### ```F10``` Start diff notice
 - ```targetAutoWindows.secret```の各行とマッチするappNameが対象
 - ```url.secret``` の"discord"フィールドにあるwebhookに投げる。
-- 変化がある場合、Discordに通知(tolerance:5,interval=5000ms)
+- 変化がある場合、Discordに通知(interval=5000ms)
 - diffチャンネル
 
 ### ```F9``` Stop diff notice
 
-## index.ts→node実行&tscコンパイル
-```npm start``` init
+## ```.secret.json``` の書き方
+
+```json
+{
+    "DISCORD_POST_URL":"https://discord.com/api/webhooks/{ほげほげ}",
+    "TARGET_WINDOW":{
+        "ONE_SHOT":   ["エクスプローラー"],
+        "AUTO":       ["エクスプローラー"]
+    },
+    "TOLERANCE":20 
+}
+```
+|Entry|Desc.|
+|-|-|
+|DISCORD_POST_URL           |WebHookを発火させるURL|
+|TARGET_WINDOW / ONE_SHOT   |スクショ対象ウィンドウ名(List)
+|TARGET_WINDOW / AUTO       |diff notice対象ウィンドウ名(List)
+
+
+## npm run スクリプト一覧
+
+### index.ts→node実行
+```npm start``` init  
 ```rs``` リセット
 
-## exe化
+### tscコンパイル ts → js
+
+```build_j``` tsc -p .
+
+### esbuildバンドル (jsのmoduleを組み込み)
+
+```build_i```
+
+### exe化
 nodeの新機能SEAを使う。
 試験機能のため警告が出る。
 
-```npm run compile``` 　```sea-config.json```を参照してスクリプトを注入したnodeを作成。
+```build_e```
 
-## script
+### 組み込めないnativeなmoduleを同袍
 
-```
-"build:live": "nodemon --watch 'index.ts' --exec \"ts-node\" index.ts"
-```
+```build_after```
 
-```
-"compile": "tsc index.ts & node --experimental-sea-config sea-config.json & powershell -c Copy-Item (command node -Syntax) app_onNode.exe & npx postject app_onNode.exe NODE_SEA_BLOB sea-prep.blob --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2"
-```
+## File Tree
+
+
+|Files||
+|-|-|
+   package*.json | Node 設定ファイル
+   index.ts | メインコード
+   .secret.json | 本プログラム用設定ファイル
+   .gitignore | 
+   tsconfig.json | index.ts -> build/index.js
+
+|Folders|File||
+|-|-|-|
+schema/ || 
+-|s.schema.json|            .secret.jsonの書き方を定義
+node_modules/||             dev用module(full)
+dist/||                     配布用最小構成
+-|node_modules/|            NativeModule関連のみ同袍
+-|pix/|                     スクショ出力
+-|.secret.json, .example|   設定ファイル例
+-|microShot.exe|            本プログラム
+build/||                    中間ファイル・ビルド定義
+-|compile_exe.ps1|          Node-SEAでEXE化スクリプト
+-|getNativeModule_4minimum.ps1|要求NativeModule持ってくる
+-|index.js|                 tscによりJS化されたTS
+-|index_integrated.js|      esbuildによりバインドされたcjs
+-|package*.json|            コピー 
+-|sea-config.json|          Node-SEAでEXE化するための設定
