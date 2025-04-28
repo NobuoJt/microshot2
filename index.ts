@@ -90,10 +90,10 @@ keyboard.addListener((event:any) => {
     if (event.name === 'RIGHT CTRL' && event.state === 'DOWN') {//右コントロール　スクショ
 
         configObj?.TARGET_WINDOW?.ONE_SHOT?.forEach((tg_window)=>{
-            windows.forEach((item:any) => {
+            windows.forEach((item:any,i:Number) => {
                 if(item.appName==tg_window){
                     let image=item.captureImageSync()
-                    let filename = `${__dirname}/pix/${item.appName}_${date.toLocaleString().replace(/\//g,"_").replace(/:/g,"_")}.png`
+                    let filename = `${__dirname}/pix/${item.appName}_${date.toLocaleString().replace(/\//g,"_").replace(/:/g,"_")} ${i}.png`
                     if(!fs.existsSync(`${__dirname}/pix`)){fs.mkdirSync(`${__dirname}/pix`)}
                     fs.writeFileSync(filename, image.toPngSync());//pix以下に保存
                     console.log("saved "+filename)

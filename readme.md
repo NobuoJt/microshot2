@@ -1,5 +1,5 @@
 # microShot2 : screen shot tool
-v2.0.1_n
+v2.0.2_w
 
 オフフォーカス、1keyでウィンドウのスクショ画像を撮影。  
 指定秒数ずつ差分をとり差分が大きい場合はdiscordに通知する。  
