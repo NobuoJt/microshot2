@@ -9,7 +9,7 @@ var require_package = __commonJS({
   "build/package.json"(exports2, module2) {
     module2.exports = {
       name: "microshot",
-      version: "2.0.2_t",
+      version: "2.0.2_u",
       description: "Take some screen shot. and detect difference.",
       main: "index.js",
       scripts: {
@@ -258,33 +258,6 @@ var __importStar = exports && exports.__importStar || /* @__PURE__ */ function()
     return result;
   };
 }();
-var __awaiter = exports && exports.__awaiter || function(thisArg, _arguments, P, generator) {
-  function adopt(value) {
-    return value instanceof P ? value : new P(function(resolve) {
-      resolve(value);
-    });
-  }
-  return new (P || (P = Promise))(function(resolve, reject) {
-    function fulfilled(value) {
-      try {
-        step(generator.next(value));
-      } catch (e) {
-        reject(e);
-      }
-    }
-    function rejected(value) {
-      try {
-        step(generator["throw"](value));
-      } catch (e) {
-        reject(e);
-      }
-    }
-    function step(result) {
-      result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
-    }
-    step((generator = generator.apply(thisArg, _arguments || [])).next());
-  });
-};
 var __importDefault = exports && exports.__importDefault || function(mod) {
   return mod && mod.__esModule ? mod : { "default": mod };
 };
@@ -385,17 +358,17 @@ setInterval(() => {
     return;
   }
   (_b = (_a = configObj === null || configObj === void 0 ? void 0 : configObj.TARGET_WINDOW) === null || _a === void 0 ? void 0 : _a.AUTO) === null || _b === void 0 ? void 0 : _b.forEach((tg_window) => {
-    windows.forEach((item, i2) => __awaiter(void 0, void 0, void 0, function* () {
+    windows.forEach((item, i2) => {
       if (item.appName == tg_window) {
         let image = item.captureImageSync();
         let result;
         if (prevImage.get(i2) !== void 0) {
-          result = yield looksSame(prevImage.get(i2), image.toPngSync(), { tolerance: configObj === null || configObj === void 0 ? void 0 : configObj.TOLERANCE, ignoreAntialiasing: false, antialiasingTolerance: 3 });
+          result = looksSame(prevImage.get(i2), image.toPngSync(), { tolerance: configObj === null || configObj === void 0 ? void 0 : configObj.TOLERANCE, ignoreAntialiasing: false, antialiasingTolerance: 3 });
           if (!(result === null || result === void 0 ? void 0 : result.equal)) {
             try {
               const formData = new FormData();
               formData.append("file", new Blob([image.toPngSync()], { type: "image/png" }), "file.png");
-              const response = yield fetch(URL, {
+              const response = fetch(URL, {
                 method: "POST",
                 body: formData
               });
@@ -406,6 +379,6 @@ setInterval(() => {
         }
         prevImage.set(i2, image.toPngSync());
       }
-    }));
+    });
   });
 }, 5e3);

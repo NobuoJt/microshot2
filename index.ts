@@ -115,18 +115,18 @@ setInterval(() => {
     if(!auto_diff_flag){return}
     
     configObj?.TARGET_WINDOW?.AUTO?.forEach((tg_window)=>{
-        windows.forEach(async (item:any,i:Number) => {
+        windows.forEach((item:any,i:Number) => {
             
             if(item.appName==tg_window){
                 let image=item.captureImageSync()
                 let result
                 if(prevImage.get(i)!==undefined){
-                    result = await looksSame(prevImage.get(i),image.toPngSync(),{tolerance:configObj?.TOLERANCE,ignoreAntialiasing:false,antialiasingTolerance:3})
+                    result = looksSame(prevImage.get(i),image.toPngSync(),{tolerance:configObj?.TOLERANCE,ignoreAntialiasing:false,antialiasingTolerance:3})
                     if(!result?.equal){
                         try{
                             const formData = new FormData()
                             formData.append('file', new Blob([image.toPngSync()], { type: 'image/png' }), 'file.png')
-                            const response = await fetch(URL, {
+                            const response = fetch(URL, {
                                 method: 'POST',
                                 body: formData
                             });
