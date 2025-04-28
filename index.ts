@@ -21,7 +21,8 @@ let prevImage=new Map();
 
 interface config {"DISCORD_POST_URL":string,"TARGET_WINDOW":{"ONE_SHOT":string[],"AUTO":string[]},"TOLERANCE":number}
 
-let configObj:config=JSON.parse(readFileSync(__dirname+'\\.secret.json').toString())//.secret.jsonの読み込み
+let configObj: config; // Configuration will be initialized in the load() function
+let URL:string
 load()
 
 function load(){
@@ -31,10 +32,11 @@ function load(){
     console.log(lc.blue("\n (Global) Key input"))
     console.log("'R Ctrl' : Capture.\n'F10' : start auto diff notice. 'F9' : stop.")
     console.log("")
-    configObj=JSON.parse(readFileSync(__dirname+'\\.secret.json').toString())//.secret.jsonの読み込み
+    configObj = JSON.parse(readFileSync(__dirname + '\\.secret.json', 'utf-8')); // Initialize configuration
+    URL=configObj?.DISCORD_POST_URL
 }
 
-const URL=configObj?.DISCORD_POST_URL
+
 
 let windows = screenshots.Window.all();
 const keyboard = new GlobalKeyboardListener.GlobalKeyboardListener();
@@ -115,7 +117,7 @@ setInterval(() => {
     if(!auto_diff_flag){return}
     
     configObj?.TARGET_WINDOW?.AUTO?.forEach((tg_window)=>{
-        windows.forEach((item:any,i:Number) => {
+        windows.forEach((item:any,i:number) => {
             
             if(item.appName==tg_window){
                 let image=item.captureImageSync()

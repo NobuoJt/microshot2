@@ -51,7 +51,8 @@ const GlobalKeyboardListener = requireFromDisk(__dirname + '\\node_modules\\node
 const looksSame = requireFromDisk(__dirname + '\\node_modules\\looks-same\\index.js');
 const version = package_json_1.default.version;
 let prevImage = new Map();
-let configObj = JSON.parse((0, fs_1.readFileSync)(__dirname + '\\.secret.json').toString()); //.secret.jsonの読み込み
+let configObj; // Configuration will be initialized in the load() function
+let URL;
 load();
 function load() {
     console.log(console_log_colors_1.default.yellowBG(" ") + console_log_colors_1.default.italic(` microShot v${version} ` + console_log_colors_1.default.yellowBG(" ")) + console_log_colors_1.default.gray(" nobuoJT"));
@@ -60,9 +61,9 @@ function load() {
     console.log(console_log_colors_1.default.blue("\n (Global) Key input"));
     console.log("'R Ctrl' : Capture.\n'F10' : start auto diff notice. 'F9' : stop.");
     console.log("");
-    configObj = JSON.parse((0, fs_1.readFileSync)(__dirname + '\\.secret.json').toString()); //.secret.jsonの読み込み
+    configObj = JSON.parse((0, fs_1.readFileSync)(__dirname + '\\.secret.json', 'utf-8')); // Initialize configuration
+    URL = configObj === null || configObj === void 0 ? void 0 : configObj.DISCORD_POST_URL;
 }
-const URL = configObj === null || configObj === void 0 ? void 0 : configObj.DISCORD_POST_URL;
 let windows = screenshots.Window.all();
 const keyboard = new GlobalKeyboardListener.GlobalKeyboardListener();
 let auto_diff_flag = false;

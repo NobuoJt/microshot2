@@ -9,7 +9,7 @@ var require_package = __commonJS({
   "build/package.json"(exports2, module2) {
     module2.exports = {
       name: "microshot",
-      version: "2.0.2_u",
+      version: "2.0.2_v",
       description: "Take some screen shot. and detect difference.",
       main: "index.js",
       scripts: {
@@ -274,7 +274,8 @@ var GlobalKeyboardListener = requireFromDisk(__dirname + "\\node_modules\\node-g
 var looksSame = requireFromDisk(__dirname + "\\node_modules\\looks-same\\index.js");
 var version = package_json_1.default.version;
 var prevImage = /* @__PURE__ */ new Map();
-var configObj = JSON.parse((0, fs_1.readFileSync)(__dirname + "\\.secret.json").toString());
+var configObj;
+var URL;
 load();
 function load() {
   console.log(console_log_colors_1.default.yellowBG(" ") + console_log_colors_1.default.italic(` microShot v${version} ` + console_log_colors_1.default.yellowBG(" ")) + console_log_colors_1.default.gray(" nobuoJT"));
@@ -283,9 +284,9 @@ function load() {
   console.log(console_log_colors_1.default.blue("\n (Global) Key input"));
   console.log("'R Ctrl' : Capture.\n'F10' : start auto diff notice. 'F9' : stop.");
   console.log("");
-  configObj = JSON.parse((0, fs_1.readFileSync)(__dirname + "\\.secret.json").toString());
+  configObj = JSON.parse((0, fs_1.readFileSync)(__dirname + "\\.secret.json", "utf-8"));
+  URL = configObj === null || configObj === void 0 ? void 0 : configObj.DISCORD_POST_URL;
 }
-var URL = configObj === null || configObj === void 0 ? void 0 : configObj.DISCORD_POST_URL;
 var windows = screenshots.Window.all();
 var keyboard = new GlobalKeyboardListener.GlobalKeyboardListener();
 var auto_diff_flag = false;
