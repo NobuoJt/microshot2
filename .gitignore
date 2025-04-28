@@ -6,3 +6,4 @@
 *.exe
 *.bak
 *.blob
+!image*.png
