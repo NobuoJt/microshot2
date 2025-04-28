@@ -3,6 +3,7 @@ import { existsSync, mkdir, mkdirSync, readFileSync } from "fs";
 import { createRequire } from "module";
 const requireFromDisk = createRequire(__filename);
 import packageJson from "./package.json"
+import { stdin } from "process";
 
 //import { screenshots } from 'node-screenshots';
 const screenshots = requireFromDisk(__dirname+'\\node_modules\\node-screenshots\\index.js');
@@ -28,16 +29,14 @@ const keyboard = new GlobalKeyboardListener.GlobalKeyboardListener();
 let auto_diff_flag=false
 
 console.log(`microShot v${version}`)
-console.log("'L' key to print window List.\n'R Ctrl' to Capture.\n'F10' to start auto diff notice. 'F9' to stop.\n'Esc' to exit.")
+console.log("\n(On console) Key input \n 'l' : print window List.\n 'L' : print window table.\n 'exit' : exit.")
+console.log("\n(Global) Key input \n 'R Ctrl' : Capture.\n 'F10' : start auto diff notice. 'F9' : stop.")
+console.log("")
 //説明
 
-
-keyboard.addListener((event:any) => {//キーボードイベント割り込み(フォーカス無視)
-    if (event.name === 'ESCAPE' && event.state === 'DOWN') {
-        console.log('Esc key pressed, exiting...');
-        process.exit();
-    }
-    if (event.name === 'L' && event.state === 'DOWN') {//L ウィンドウリストの表示
+//標準入力割り込み
+stdin.addListener("data",(e)=>{
+    if (e?.toString().match("L")){///L ウィンドウリストの表示
         windows.forEach((item:any) => {
             console.table({
                 id: item.id,
@@ -55,13 +54,23 @@ keyboard.addListener((event:any) => {//キーボードイベント割り込み(�
                 isMaximized: item.isMaximized,
             });
         });
-        
-        windows.forEach((item:any) => {//アプリ名のみ
+    }
+    if (e?.toString().match("l")){///l アプリ名のみ
+        windows.forEach((item:any) => {
             console.log({
                 appName: item.appName,
             });
         });
     }
+    if (e?.toString().match(/exit/gi)){///l アプリ名のみ
+        console.log('stdin:"exit" detected , exiting...');
+        process.exit();
+    }
+    console.log(e?.toString())
+});
+
+//キーボードイベント割り込み(フォーカス無視)
+keyboard.addListener((event:any) => {
     let date=new Date()
     if (event.name === 'RIGHT CTRL' && event.state === 'DOWN') {//右コントロール　スクショ
 

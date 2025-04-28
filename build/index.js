@@ -49,6 +49,7 @@ const fs = __importStar(require("fs"));
 const module_1 = require("module");
 const requireFromDisk = (0, module_1.createRequire)(__filename);
 const package_json_1 = __importDefault(require("./package.json"));
+const process_1 = require("process");
 //import { screenshots } from 'node-screenshots';
 const screenshots = requireFromDisk(__dirname + '\\node_modules\\node-screenshots\\index.js');
 //import { GlobalKeyboardListener } from 'node-global-key-listener';
@@ -63,15 +64,13 @@ let windows = screenshots.Window.all();
 const keyboard = new GlobalKeyboardListener.GlobalKeyboardListener();
 let auto_diff_flag = false;
 console.log(`microShot v${version}`);
-console.log("'L' key to print window List.\n'R Ctrl' to Capture.\n'F10' to start auto diff notice. 'F9' to stop.\n'Esc' to exit.");
+console.log("\n(On console) Key input \n 'l' : print window List.\n 'L' : print window table.\n 'exit' : exit.");
+console.log("\n(Global) Key input \n 'R Ctrl' : Capture.\n 'F10' : start auto diff notice. 'F9' : stop.");
+console.log("");
 //説明
-keyboard.addListener((event) => {
-    var _a, _b;
-    if (event.name === 'ESCAPE' && event.state === 'DOWN') {
-        console.log('Esc key pressed, exiting...');
-        process.exit();
-    }
-    if (event.name === 'L' && event.state === 'DOWN') { //L ウィンドウリストの表示
+//標準入力割り込み
+process_1.stdin.addListener("data", (e) => {
+    if (e === null || e === void 0 ? void 0 : e.toString().match("L")) { ///L ウィンドウリストの表示
         windows.forEach((item) => {
             console.table({
                 id: item.id,
@@ -89,12 +88,23 @@ keyboard.addListener((event) => {
                 isMaximized: item.isMaximized,
             });
         });
+    }
+    if (e === null || e === void 0 ? void 0 : e.toString().match("l")) { ///l アプリ名のみ
         windows.forEach((item) => {
             console.log({
                 appName: item.appName,
             });
         });
     }
+    if (e === null || e === void 0 ? void 0 : e.toString().match(/exit/gi)) { ///l アプリ名のみ
+        console.log('stdin:"exit" detected , exiting...');
+        process.exit();
+    }
+    console.log(e === null || e === void 0 ? void 0 : e.toString());
+});
+//キーボードイベント割り込み(フォーカス無視)
+keyboard.addListener((event) => {
+    var _a, _b;
     let date = new Date();
     if (event.name === 'RIGHT CTRL' && event.state === 'DOWN') { //右コントロール　スクショ
         (_b = (_a = configObj === null || configObj === void 0 ? void 0 : configObj.TARGET_WINDOW) === null || _a === void 0 ? void 0 : _a.ONE_SHOT) === null || _b === void 0 ? void 0 : _b.forEach((tg_window) => {

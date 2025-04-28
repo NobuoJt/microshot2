@@ -9,7 +9,7 @@ var require_package = __commonJS({
   "build/package.json"(exports2, module2) {
     module2.exports = {
       name: "microshot",
-      version: "2.0.1_m",
+      version: "2.0.1_p",
       description: "Take some screen shot. and detect difference.",
       main: "index.js",
       scripts: {
@@ -19,7 +19,7 @@ var require_package = __commonJS({
         build_i: '".\\node_modules\\.bin\\esbuild" --bundle build/index.js --outfile=build/index_integrated.js --platform=node --external:*.node',
         build_e: "powershell -c build\\compile_exe.ps1",
         build_after: "powershell -c build\\getNativeModule_4minimum.ps1",
-        compile: "npm run build_j | npm run build_i | npm run build_e | npm run build_after"
+        compile: "npm run build_j && npm run build_i && npm run build_e && npm run build_after"
       },
       keywords: [
         "screenshot"
@@ -114,6 +114,7 @@ var fs = __importStar(require("fs"));
 var module_1 = require("module");
 var requireFromDisk = (0, module_1.createRequire)(__filename);
 var package_json_1 = __importDefault(require_package());
+var process_1 = require("process");
 var screenshots = requireFromDisk(__dirname + "\\node_modules\\node-screenshots\\index.js");
 var GlobalKeyboardListener = requireFromDisk(__dirname + "\\node_modules\\node-global-key-listener\\build\\index.js");
 var looksSame = requireFromDisk(__dirname + "\\node_modules\\looks-same\\index.js");
@@ -125,14 +126,11 @@ var windows = screenshots.Window.all();
 var keyboard = new GlobalKeyboardListener.GlobalKeyboardListener();
 var auto_diff_flag = false;
 console.log(`microShot v${version}`);
-console.log("'L' key to print window List.\n'R Ctrl' to Capture.\n'F10' to start auto diff notice. 'F9' to stop.\n'Esc' to exit.");
-keyboard.addListener((event) => {
-  var _a, _b;
-  if (event.name === "ESCAPE" && event.state === "DOWN") {
-    console.log("Esc key pressed, exiting...");
-    process.exit();
-  }
-  if (event.name === "L" && event.state === "DOWN") {
+console.log("\n(On console) Key input \n 'l' : print window List.\n 'L' : print window table.\n 'exit' : exit.");
+console.log("\n(Global) Key input \n 'R Ctrl' : Capture.\n 'F10' : start auto diff notice. 'F9' : stop.");
+console.log("");
+process_1.stdin.addListener("data", (e) => {
+  if (e === null || e === void 0 ? void 0 : e.toString().match("L")) {
     windows.forEach((item) => {
       console.table({
         id: item.id,
@@ -150,12 +148,22 @@ keyboard.addListener((event) => {
         isMaximized: item.isMaximized
       });
     });
+  }
+  if (e === null || e === void 0 ? void 0 : e.toString().match("l")) {
     windows.forEach((item) => {
       console.log({
         appName: item.appName
       });
     });
   }
+  if (e === null || e === void 0 ? void 0 : e.toString().match(/exit/gi)) {
+    console.log('stdin:"exit" detected , exiting...');
+    process.exit();
+  }
+  console.log(e === null || e === void 0 ? void 0 : e.toString());
+});
+keyboard.addListener((event) => {
+  var _a, _b;
   let date = /* @__PURE__ */ new Date();
   if (event.name === "RIGHT CTRL" && event.state === "DOWN") {
     (_b = (_a = configObj === null || configObj === void 0 ? void 0 : configObj.TARGET_WINDOW) === null || _a === void 0 ? void 0 : _a.ONE_SHOT) === null || _b === void 0 ? void 0 : _b.forEach((tg_window) => {
