@@ -9,7 +9,7 @@ var require_package = __commonJS({
   "build/package.json"(exports2, module2) {
     module2.exports = {
       name: "microshot",
-      version: "2.0.1_t",
+      version: "2.0.2_t",
       description: "Take some screen shot. and detect difference.",
       main: "index.js",
       scripts: {
