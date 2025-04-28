@@ -46,6 +46,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const fs = __importStar(require("fs"));
+const fs_1 = require("fs");
 const module_1 = require("module");
 const requireFromDisk = (0, module_1.createRequire)(__filename);
 const package_json_1 = __importDefault(require("./package.json"));
@@ -58,15 +59,19 @@ const GlobalKeyboardListener = requireFromDisk(__dirname + '\\node_modules\\node
 const looksSame = requireFromDisk(__dirname + '\\node_modules\\looks-same\\index.js');
 const version = package_json_1.default.version;
 let prevImage = new Map();
-const configObj = JSON.parse(fs.readFileSync(__dirname + "/.secret.json").toString());
+let configObj = JSON.parse((0, fs_1.readFileSync)(__dirname + '\\.secret.json').toString()); //.secret.jsonの読み込み
+load();
+function load() {
+    console.log(`microShot v${version}`);
+    console.log("\n(On console) Key input \n 'l' : print window List.\n 'L' : print window table.\n 'r' : reload .secret.json and reInit \n 'exit' : exit.");
+    console.log("\n(Global) Key input \n 'R Ctrl' : Capture.\n 'F10' : start auto diff notice. 'F9' : stop.");
+    console.log("");
+    configObj = JSON.parse((0, fs_1.readFileSync)(__dirname + '\\.secret.json').toString()); //.secret.jsonの読み込み
+}
 const URL = configObj === null || configObj === void 0 ? void 0 : configObj.DISCORD_POST_URL;
 let windows = screenshots.Window.all();
 const keyboard = new GlobalKeyboardListener.GlobalKeyboardListener();
 let auto_diff_flag = false;
-console.log(`microShot v${version}`);
-console.log("\n(On console) Key input \n 'l' : print window List.\n 'L' : print window table.\n 'exit' : exit.");
-console.log("\n(Global) Key input \n 'R Ctrl' : Capture.\n 'F10' : start auto diff notice. 'F9' : stop.");
-console.log("");
 //説明
 //標準入力割り込み
 process_1.stdin.addListener("data", (e) => {
@@ -96,11 +101,15 @@ process_1.stdin.addListener("data", (e) => {
             });
         });
     }
-    if (e === null || e === void 0 ? void 0 : e.toString().match(/exit/gi)) { ///l アプリ名のみ
+    if (e === null || e === void 0 ? void 0 : e.toString().match(/exit/gi)) { ///exit 終了
         console.log('stdin:"exit" detected , exiting...');
         process.exit();
     }
-    console.log(e === null || e === void 0 ? void 0 : e.toString());
+    if (e === null || e === void 0 ? void 0 : e.toString().match(/r/gi)) { //reload .secret
+        load();
+        console.log(".secret.json reloaded");
+    }
+    //console.log(e?.toString())
 });
 //キーボードイベント割り込み(フォーカス無視)
 keyboard.addListener((event) => {

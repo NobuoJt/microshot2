@@ -111,6 +111,7 @@ var __importDefault = exports && exports.__importDefault || function(mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var fs = __importStar(require("fs"));
+var fs_1 = require("fs");
 var module_1 = require("module");
 var requireFromDisk = (0, module_1.createRequire)(__filename);
 var package_json_1 = __importDefault(require_package());
@@ -120,15 +121,19 @@ var GlobalKeyboardListener = requireFromDisk(__dirname + "\\node_modules\\node-g
 var looksSame = requireFromDisk(__dirname + "\\node_modules\\looks-same\\index.js");
 var version = package_json_1.default.version;
 var prevImage = /* @__PURE__ */ new Map();
-var configObj = JSON.parse(fs.readFileSync(__dirname + "/.secret.json").toString());
+var configObj = JSON.parse((0, fs_1.readFileSync)(__dirname + "\\.secret.json").toString());
+load();
+function load() {
+  console.log(`microShot v${version}`);
+  console.log("\n(On console) Key input \n 'l' : print window List.\n 'L' : print window table.\n 'r' : reload .secret.json and reInit \n 'exit' : exit.");
+  console.log("\n(Global) Key input \n 'R Ctrl' : Capture.\n 'F10' : start auto diff notice. 'F9' : stop.");
+  console.log("");
+  configObj = JSON.parse((0, fs_1.readFileSync)(__dirname + "\\.secret.json").toString());
+}
 var URL = configObj === null || configObj === void 0 ? void 0 : configObj.DISCORD_POST_URL;
 var windows = screenshots.Window.all();
 var keyboard = new GlobalKeyboardListener.GlobalKeyboardListener();
 var auto_diff_flag = false;
-console.log(`microShot v${version}`);
-console.log("\n(On console) Key input \n 'l' : print window List.\n 'L' : print window table.\n 'exit' : exit.");
-console.log("\n(Global) Key input \n 'R Ctrl' : Capture.\n 'F10' : start auto diff notice. 'F9' : stop.");
-console.log("");
 process_1.stdin.addListener("data", (e) => {
   if (e === null || e === void 0 ? void 0 : e.toString().match("L")) {
     windows.forEach((item) => {
@@ -160,7 +165,10 @@ process_1.stdin.addListener("data", (e) => {
     console.log('stdin:"exit" detected , exiting...');
     process.exit();
   }
-  console.log(e === null || e === void 0 ? void 0 : e.toString());
+  if (e === null || e === void 0 ? void 0 : e.toString().match(/r/gi)) {
+    load();
+    console.log(".secret.json reloaded");
+  }
 });
 keyboard.addListener((event) => {
   var _a, _b;

@@ -20,7 +20,16 @@ let prevImage=new Map();
 
 interface config {"DISCORD_POST_URL":string,"TARGET_WINDOW":{"ONE_SHOT":string[],"AUTO":string[]},"TOLERANCE":number}
 
-const configObj:config=JSON.parse(fs.readFileSync(__dirname+"/.secret.json").toString())
+let configObj:config=JSON.parse(readFileSync(__dirname+'\\.secret.json').toString())//.secret.jsonの読み込み
+load()
+
+function load(){
+    console.log(`microShot v${version}`)
+    console.log("\n(On console) Key input \n 'l' : print window List.\n 'L' : print window table.\n 'r' : reload .secret.json and reInit \n 'exit' : exit.")
+    console.log("\n(Global) Key input \n 'R Ctrl' : Capture.\n 'F10' : start auto diff notice. 'F9' : stop.")
+    console.log("")
+    configObj=JSON.parse(readFileSync(__dirname+'\\.secret.json').toString())//.secret.jsonの読み込み
+}
 
 const URL=configObj?.DISCORD_POST_URL
 
@@ -28,10 +37,7 @@ let windows = screenshots.Window.all();
 const keyboard = new GlobalKeyboardListener.GlobalKeyboardListener();
 let auto_diff_flag=false
 
-console.log(`microShot v${version}`)
-console.log("\n(On console) Key input \n 'l' : print window List.\n 'L' : print window table.\n 'exit' : exit.")
-console.log("\n(Global) Key input \n 'R Ctrl' : Capture.\n 'F10' : start auto diff notice. 'F9' : stop.")
-console.log("")
+
 //説明
 
 //標準入力割り込み
@@ -62,11 +68,15 @@ stdin.addListener("data",(e)=>{
             });
         });
     }
-    if (e?.toString().match(/exit/gi)){///l アプリ名のみ
+    if (e?.toString().match(/exit/gi)){///exit 終了
         console.log('stdin:"exit" detected , exiting...');
         process.exit();
     }
-    console.log(e?.toString())
+    if (e?.toString().match(/r/gi)){//reload .secret
+        load()
+        console.log(".secret.json reloaded")
+    }
+    //console.log(e?.toString())
 });
 
 //キーボードイベント割り込み(フォーカス無視)
