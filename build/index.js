@@ -64,7 +64,7 @@ let configObj = JSON.parse((0, fs_1.readFileSync)(__dirname + '\\.secret.json').
 load();
 function load() {
     console.log(console_log_colors_1.default.yellowBG(" ") + console_log_colors_1.default.italic(` microShot v${version} ` + console_log_colors_1.default.yellowBG(" ")) + console_log_colors_1.default.gray(" nobuoJT"));
-    console.log(console_log_colors_1.default.blue.bold("\n (On console) Key input "));
+    console.log(console_log_colors_1.default.blue("\n (On console) Key input "));
     console.log("'l' : print window List.\n'L' : print window table.\n'r' : reload .secret.json and reInit \n'exit' : exit.");
     console.log(console_log_colors_1.default.blue("\n (Global) Key input"));
     console.log("'R Ctrl' : Capture.\n'F10' : start auto diff notice. 'F9' : stop.");

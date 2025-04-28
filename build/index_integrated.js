@@ -9,7 +9,7 @@ var require_package = __commonJS({
   "build/package.json"(exports2, module2) {
     module2.exports = {
       name: "microshot",
-      version: "2.0.1_r",
+      version: "2.0.1_t",
       description: "Take some screen shot. and detect difference.",
       main: "index.js",
       scripts: {
@@ -30,8 +30,8 @@ var require_package = __commonJS({
         "@types/node": "^22.13.14",
         "console-log-colors": "^0.5.0",
         esbuild: "^0.25.3",
+        "license-checker": "^25.0.1",
         "looks-same": "^9.0.1",
-        microshot: "file:",
         "node-global-key-listener": "^0.3.0",
         "node-screenshots": "^0.2.1",
         nodemon: "^3.1.9",
@@ -305,7 +305,7 @@ var configObj = JSON.parse((0, fs_1.readFileSync)(__dirname + "\\.secret.json").
 load();
 function load() {
   console.log(console_log_colors_1.default.yellowBG(" ") + console_log_colors_1.default.italic(` microShot v${version} ` + console_log_colors_1.default.yellowBG(" ")) + console_log_colors_1.default.gray(" nobuoJT"));
-  console.log(console_log_colors_1.default.blue.bold("\n (On console) Key input "));
+  console.log(console_log_colors_1.default.blue("\n (On console) Key input "));
   console.log("'l' : print window List.\n'L' : print window table.\n'r' : reload .secret.json and reInit \n'exit' : exit.");
   console.log(console_log_colors_1.default.blue("\n (Global) Key input"));
   console.log("'R Ctrl' : Capture.\n'F10' : start auto diff notice. 'F9' : stop.");

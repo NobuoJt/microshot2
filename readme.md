@@ -11,10 +11,24 @@ continue from [microShot(Legacy)](https://github.com/NobuoJt/microShot/blob/main
 ```ts-node index.ts``` or 
 ```dist/microShot.exe```
 
-## Key Config
+## Key (Focus)
+It's means console input.
 
-### ```L``` Show window List
-- info by window Table/ appName List
+### ```l``` Show window List(summary)
+- info by window Table
+
+### ```L``` Show window List(detail)
+- appName List
+
+### ```exit``` Exit
+
+### ```r``` Reload
+- Reload ```.secret.json``` and Reinitialize
+
+## Key (Global)
+
+Even if the window is not in focus.
+
 ### ```Right Ctrl``` One shot capture
 - ```targetWindows.secret```の各行とマッチするappNameが対象
 - ファイル名は```pix/{appName}_{YYYY}_{M}_{D} {h}_{m}_{s}```
