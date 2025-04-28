@@ -1,1 +1,1 @@
-{ "main": "build/index_integrated.js", "output": "sea-prep.blob" }
+{ "main": "../build/index_integrated.js", "output": "../build/sea-prep.blob" }

@@ -52,23 +52,29 @@ continue from [microShot(Legacy)](https://github.com/NobuoJt/microShot/blob/main
 ```npm start``` init  
 ```rs``` リセット
 
+### 一連のコンパイル  
+以下のスクリプトを逐次実行。  
+*ルートディレクトリで行ってください。*  
+
+```npm run compile``` js → ts → cjs → blob → exe
+
 ### tscコンパイル ts → js
 
-```build_j``` tsc -p .
+```npm run build_j``` tsc -p .
 
 ### esbuildバンドル (jsのmoduleを組み込み)
 
-```build_i```
+```npm run build_i```
 
 ### exe化
 nodeの新機能SEAを使う。
 試験機能のため警告が出る。
 
-```build_e```
+```npm run build_e```
 
 ### 組み込めないnativeなmoduleを同袍
 
-```build_after```
+```npm run build_after```
 
 ## File Tree
 
