@@ -9,7 +9,7 @@ var require_package = __commonJS({
   "build/package.json"(exports2, module2) {
     module2.exports = {
       name: "microshot",
-      version: "2.0.2_v",
+      version: "2.0.2_w",
       description: "Take some screen shot. and detect difference.",
       main: "index.js",
       scripts: {
@@ -331,10 +331,10 @@ keyboard.addListener((event) => {
   let date = /* @__PURE__ */ new Date();
   if (event.name === "RIGHT CTRL" && event.state === "DOWN") {
     (_b = (_a = configObj === null || configObj === void 0 ? void 0 : configObj.TARGET_WINDOW) === null || _a === void 0 ? void 0 : _a.ONE_SHOT) === null || _b === void 0 ? void 0 : _b.forEach((tg_window) => {
-      windows.forEach((item) => {
+      windows.forEach((item, i2) => {
         if (item.appName == tg_window) {
           let image = item.captureImageSync();
-          let filename = `${__dirname}/pix/${item.appName}_${date.toLocaleString().replace(/\//g, "_").replace(/:/g, "_")}.png`;
+          let filename = `${__dirname}/pix/${item.appName}_${date.toLocaleString().replace(/\//g, "_").replace(/:/g, "_")} ${i2}.png`;
           if (!fs.existsSync(`${__dirname}/pix`)) {
             fs.mkdirSync(`${__dirname}/pix`);
           }

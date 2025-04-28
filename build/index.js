@@ -112,10 +112,10 @@ keyboard.addListener((event) => {
     let date = new Date();
     if (event.name === 'RIGHT CTRL' && event.state === 'DOWN') { //右コントロール　スクショ
         (_b = (_a = configObj === null || configObj === void 0 ? void 0 : configObj.TARGET_WINDOW) === null || _a === void 0 ? void 0 : _a.ONE_SHOT) === null || _b === void 0 ? void 0 : _b.forEach((tg_window) => {
-            windows.forEach((item) => {
+            windows.forEach((item, i) => {
                 if (item.appName == tg_window) {
                     let image = item.captureImageSync();
-                    let filename = `${__dirname}/pix/${item.appName}_${date.toLocaleString().replace(/\//g, "_").replace(/:/g, "_")}.png`;
+                    let filename = `${__dirname}/pix/${item.appName}_${date.toLocaleString().replace(/\//g, "_").replace(/:/g, "_")} ${i}.png`;
                     if (!fs.existsSync(`${__dirname}/pix`)) {
                         fs.mkdirSync(`${__dirname}/pix`);
                     }
