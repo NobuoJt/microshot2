@@ -26,7 +26,7 @@ load()
 
 function load(){
     console.log(lc.yellowBG(" ")+lc.italic(` microShot v${version} `+lc.yellowBG(" "))+lc.gray(" nobuoJT"))
-    console.log(lc.blue.bold("\n (On console) Key input "))
+    console.log(lc.blue("\n (On console) Key input "))
     console.log("'l' : print window List.\n'L' : print window table.\n'r' : reload .secret.json and reInit \n'exit' : exit.")
     console.log(lc.blue("\n (Global) Key input"))
     console.log("'R Ctrl' : Capture.\n'F10' : start auto diff notice. 'F9' : stop.")
