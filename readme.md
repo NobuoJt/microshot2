@@ -104,3 +104,16 @@ build/||                    中間ファイル・ビルド定義
 -|index_integrated.js|      esbuildによりバインドされたcjs
 -|package*.json|            コピー 
 -|sea-config.json|          Node-SEAでEXE化するための設定
+
+## ライセンス関連
+
+これ自体はMIT。  
+詳細は ```license_detail/```で、
+
+|||
+|-|-|
+NOTICE| Apache 2.0, CC-BYの継承部分
+license_sum|npx license-checkerの結果の一部
+license_links|license_sumのリンク部分
+get_license_files.ps1|license_linksからLICENSE本文を引っ張ってくるスクリプト
+thirdParty/|引っ張ってきたLICENSE本文たち

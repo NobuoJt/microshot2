@@ -1,6 +1,6 @@
 {
   "name": "microshot",
-  "version": "2.0.1_r",
+  "version": "2.0.1_s",
   "description": "Take some screen shot. and detect difference.",
   "main": "index.js",
   "scripts": {
