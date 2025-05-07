@@ -104,7 +104,7 @@ keyboard.addListener((event:any) => {
 
     if (event.name === 'F10' && event.state === 'DOWN') {//F10
         auto_diff_flag=true
-        console.log("auto_diff_flag=true")
+        console.log(`auto_diff_flag=true (tolerance:${configObj?.TOLERANCE}, target:${configObj?.TARGET_WINDOW?.AUTO})`)
     }
     if (event.name === 'F9' && event.state === 'DOWN') {//F9
         auto_diff_flag=false
@@ -113,22 +113,24 @@ keyboard.addListener((event:any) => {
 });
 
 
-setInterval(() => {
+setInterval(async () => {
     if(!auto_diff_flag){return}
     
     configObj?.TARGET_WINDOW?.AUTO?.forEach((tg_window)=>{
-        windows.forEach((item:any,i:number) => {
+        windows.forEach(async (item:any,i:number) => {
             
             if(item.appName==tg_window){
                 let image=item.captureImageSync()
                 let result
                 if(prevImage.get(i)!==undefined){
-                    result = looksSame(prevImage.get(i),image.toPngSync(),{tolerance:configObj?.TOLERANCE,ignoreAntialiasing:false,antialiasingTolerance:3})
-                    if(!result?.equal){
+                    result = await looksSame(prevImage.get(i),image.toPngSync(),{tolerance:configObj?.TOLERANCE,ignoreAntialiasing:false,antialiasingTolerance:3})
+                    console.log(""+`result:${result?.equal} metaInfo:${result?.metaInfo} diffBounds:${result?.diffBounds} diffClusters:${result?.diffClusters} `)
+                    
+                    if(false===result?.equal){
                         try{
                             const formData = new FormData()
                             formData.append('file', new Blob([image.toPngSync()], { type: 'image/png' }), 'file.png')
-                            const response = fetch(URL, {
+                            const response = await fetch(URL, {
                                 method: 'POST',
                                 body: formData
                             });

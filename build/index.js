@@ -32,6 +32,15 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -108,7 +117,7 @@ process_1.stdin.addListener("data", (e) => {
 });
 //キーボードイベント割り込み(フォーカス無視)
 keyboard.addListener((event) => {
-    var _a, _b;
+    var _a, _b, _c;
     let date = new Date();
     if (event.name === 'RIGHT CTRL' && event.state === 'DOWN') { //右コントロール　スクショ
         (_b = (_a = configObj === null || configObj === void 0 ? void 0 : configObj.TARGET_WINDOW) === null || _a === void 0 ? void 0 : _a.ONE_SHOT) === null || _b === void 0 ? void 0 : _b.forEach((tg_window) => {
@@ -127,30 +136,31 @@ keyboard.addListener((event) => {
     }
     if (event.name === 'F10' && event.state === 'DOWN') { //F10
         auto_diff_flag = true;
-        console.log("auto_diff_flag=true");
+        console.log(`auto_diff_flag=true (tolerance:${configObj === null || configObj === void 0 ? void 0 : configObj.TOLERANCE}, target:${(_c = configObj === null || configObj === void 0 ? void 0 : configObj.TARGET_WINDOW) === null || _c === void 0 ? void 0 : _c.AUTO})`);
     }
     if (event.name === 'F9' && event.state === 'DOWN') { //F9
         auto_diff_flag = false;
         console.log("auto_diff_flag=false");
     }
 });
-setInterval(() => {
+setInterval(() => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;
     if (!auto_diff_flag) {
         return;
     }
     (_b = (_a = configObj === null || configObj === void 0 ? void 0 : configObj.TARGET_WINDOW) === null || _a === void 0 ? void 0 : _a.AUTO) === null || _b === void 0 ? void 0 : _b.forEach((tg_window) => {
-        windows.forEach((item, i) => {
+        windows.forEach((item, i) => __awaiter(void 0, void 0, void 0, function* () {
             if (item.appName == tg_window) {
                 let image = item.captureImageSync();
                 let result;
                 if (prevImage.get(i) !== undefined) {
-                    result = looksSame(prevImage.get(i), image.toPngSync(), { tolerance: configObj === null || configObj === void 0 ? void 0 : configObj.TOLERANCE, ignoreAntialiasing: false, antialiasingTolerance: 3 });
-                    if (!(result === null || result === void 0 ? void 0 : result.equal)) {
+                    result = yield looksSame(prevImage.get(i), image.toPngSync(), { tolerance: configObj === null || configObj === void 0 ? void 0 : configObj.TOLERANCE, ignoreAntialiasing: false, antialiasingTolerance: 3 });
+                    console.log("" + `result:${result === null || result === void 0 ? void 0 : result.equal} metaInfo:${result === null || result === void 0 ? void 0 : result.metaInfo} diffBounds:${result === null || result === void 0 ? void 0 : result.diffBounds} diffClusters:${result === null || result === void 0 ? void 0 : result.diffClusters} `);
+                    if (false === (result === null || result === void 0 ? void 0 : result.equal)) {
                         try {
                             const formData = new FormData();
                             formData.append('file', new Blob([image.toPngSync()], { type: 'image/png' }), 'file.png');
-                            const response = fetch(URL, {
+                            const response = yield fetch(URL, {
                                 method: 'POST',
                                 body: formData
                             });
@@ -162,6 +172,6 @@ setInterval(() => {
                 }
                 prevImage.set(i, image.toPngSync());
             }
-        });
+        }));
     });
-}, 5000);
+}), 5000);
