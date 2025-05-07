@@ -27,6 +27,7 @@ var require_package = __commonJS({
       author: "nobuoJT",
       license: "ISC",
       dependencies: {
+        "@esbuild/win32-x64": "^0.25.4",
         "@types/node": "^22.13.14",
         "console-log-colors": "^0.5.0",
         esbuild: "^0.25.3",

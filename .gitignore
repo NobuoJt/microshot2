@@ -3,7 +3,7 @@
 *.jpg
 *.jpeg
 *.png
-*.exe
+dist/*.exe
 *.bak
 *.blob
 !image*.png
