@@ -9,7 +9,7 @@ var require_package = __commonJS({
   "build/package.json"(exports2, module2) {
     module2.exports = {
       name: "microshot",
-      version: "2.0.4_z",
+      version: "2.0.6_a",
       description: "Take some screen shot. and detect difference.",
       main: "index.js",
       scripts: {
@@ -222,7 +222,7 @@ var require_src = __commonJS({
 });
 
 // build/index.js
-var __createBinding = exports && exports.__createBinding || (Object.create ? function(o, m, k, k2) {
+var __createBinding = exports && exports.__createBinding || (Object.create ? (function(o, m, k, k2) {
   if (k2 === void 0) k2 = k;
   var desc = Object.getOwnPropertyDescriptor(m, k);
   if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
@@ -231,16 +231,16 @@ var __createBinding = exports && exports.__createBinding || (Object.create ? fun
     } };
   }
   Object.defineProperty(o, k2, desc);
-} : function(o, m, k, k2) {
+}) : (function(o, m, k, k2) {
   if (k2 === void 0) k2 = k;
   o[k2] = m[k];
-});
-var __setModuleDefault = exports && exports.__setModuleDefault || (Object.create ? function(o, v) {
+}));
+var __setModuleDefault = exports && exports.__setModuleDefault || (Object.create ? (function(o, v) {
   Object.defineProperty(o, "default", { enumerable: true, value: v });
-} : function(o, v) {
+}) : function(o, v) {
   o["default"] = v;
 });
-var __importStar = exports && exports.__importStar || /* @__PURE__ */ function() {
+var __importStar = exports && exports.__importStar || /* @__PURE__ */ (function() {
   var ownKeys = function(o) {
     ownKeys = Object.getOwnPropertyNames || function(o2) {
       var ar = [];
@@ -258,7 +258,7 @@ var __importStar = exports && exports.__importStar || /* @__PURE__ */ function()
     __setModuleDefault(result, mod);
     return result;
   };
-}();
+})();
 var __awaiter = exports && exports.__awaiter || function(thisArg, _arguments, P, generator) {
   function adopt(value) {
     return value instanceof P ? value : new P(function(resolve) {
