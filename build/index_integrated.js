@@ -36,6 +36,7 @@ var require_package = __commonJS({
         "node-global-key-listener": "^0.3.0",
         "node-screenshots": "^0.2.1",
         nodemon: "^3.1.9",
+        sharp: "^0.34.5",
         "ts-node": "^10.9.2",
         typescript: "^5.8.2"
       }
@@ -43,9 +44,9 @@ var require_package = __commonJS({
   }
 });
 
-// node_modules/console-log-colors/src/index.js
+// node_modules/.pnpm/console-log-colors@0.5.0/node_modules/console-log-colors/src/index.js
 var require_src = __commonJS({
-  "node_modules/console-log-colors/src/index.js"(exports, module) {
+  "node_modules/.pnpm/console-log-colors@0.5.0/node_modules/console-log-colors/src/index.js"(exports, module) {
     var colorList = {
       // modifier
       reset: [0, 0],

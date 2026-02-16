@@ -27,6 +27,7 @@
         "node-global-key-listener": "^0.3.0",
         "node-screenshots": "^0.2.1",
         "nodemon": "^3.1.9",
+        "sharp": "^0.34.5",
         "ts-node": "^10.9.2",
         "typescript": "^5.8.2"
     }
