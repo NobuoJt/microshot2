@@ -7,3 +7,5 @@ dist/*.exe
 *.bak
 *.blob
 !image*.png
+/node_modules
+/_node_modules
