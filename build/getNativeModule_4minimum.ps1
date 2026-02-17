@@ -6,9 +6,18 @@ try{
         New-Item -ItemType Directory -Path "dist/node_modules" | Out-Null
     }
 
+    $renamed = $false
     if ( (Test-Path "node_modules")) {
         Write-Host "最小構成隔離のため、親のnode_modulesを一時的にリネーム"
-        Rename-Item -Path "node_modules" -NewName "_node_modules" | Out-Null
+        try {
+            Rename-Item -Path "node_modules" -NewName "_node_modules" -ErrorAction Stop
+            $renamed = $true
+        }
+        catch {
+            Write-Host "⚠ node_modules のリネームに失敗しました。スキップします: $_"
+            # リネームできなければ _node_modules が存在しない可能性があるため、継続時は直接 node_modules を参照する
+            $renamed = $false
+        }
     }
     Write-Host "native module 引き込み開始"
 
@@ -39,16 +48,25 @@ try{
 
             Write-Host "▶ モジュールが見つかりません: $missingModule"
             
-            $sourcePath = "_node_modules\$missingModule"
-            $destPath = "dist\node_modules\$missingModule"
+            $candidates = @()
+            # 優先順: (1) 一時リネームされた _node_modules, (2) 現在の node_modules
+            $candidates += Join-Path "_node_modules" $missingModule
+            $candidates += Join-Path "node_modules" $missingModule
+            $candidates += Join-Path "." (Join-Path "node_modules" $missingModule)
 
-            # 5. コピー
-            if (Test-Path $sourcePath) {
-                Write-Host "▶ コピーします: $sourcePath → $destPath"
-                Copy-Item -Path $sourcePath -Destination $destPath -Recurse -Force
+            $found = $null
+            foreach ($cand in $candidates) {
+                if (Test-Path $cand) { $found = $cand; break }
+            }
+
+            if ($found) {
+                $destPath = Join-Path "dist\node_modules" $missingModule
+                Write-Host "▶ コピーします: $found → $destPath"
+                New-Item -ItemType Directory -Force -Path (Split-Path $destPath) | Out-Null
+                Copy-Item -Path $found -Destination $destPath -Recurse -Force
             }
             else {
-                Write-Host "⚠ モジュール $missingModule は _node_modules に存在しません！"
+                Write-Host "⚠ モジュール $missingModule は候補の場所に存在しません！検索を拡張するか手動でコピーしてください。"
                 break
             }
         }
