@@ -48,16 +48,41 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const fs = __importStar(require("fs"));
 const fs_1 = require("fs");
 const module_1 = require("module");
+const path = __importStar(require("path"));
 const requireFromDisk = (0, module_1.createRequire)(__filename);
 const package_json_1 = __importDefault(require("./package.json"));
 const process_1 = require("process");
 const console_log_colors_1 = __importDefault(require("console-log-colors"));
 //import { screenshots } from 'node-screenshots';
-const screenshots = requireFromDisk(__dirname + '\\node_modules\\node-screenshots\\index.js');
+let screenshots = undefined;
+let screenshotsAvailable = false;
+try {
+    screenshots = requireFromDisk(__dirname + '\\node_modules\\node-screenshots\\index.js');
+    screenshotsAvailable = true;
+}
+catch (err) {
+    console.warn(console_log_colors_1.default.yellow("node-screenshots not available — capture features disabled."));
+}
 //import { GlobalKeyboardListener } from 'node-global-key-listener';
-const GlobalKeyboardListener = requireFromDisk(__dirname + '\\node_modules\\node-global-key-listener\\build\\index.js');
+let GlobalKeyboardListener;
+let globalHookAvailable = false;
+try {
+    GlobalKeyboardListener = requireFromDisk(__dirname + '\\node_modules\\node-global-key-listener\\build\\index.js');
+    globalHookAvailable = true;
+}
+catch (err) {
+    console.warn(console_log_colors_1.default.yellow("Global keyboard hook module not available, falling back to CLI input."));
+}
 //import looksSame from 'looks-same';
-const looksSame = requireFromDisk(__dirname + '\\node_modules\\looks-same\\index.js');
+let looksSame = undefined;
+let looksSameAvailable = false;
+try {
+    looksSame = requireFromDisk(__dirname + '\\node_modules\\looks-same\\index.js');
+    looksSameAvailable = true;
+}
+catch (err) {
+    console.warn(console_log_colors_1.default.yellow("looks-same not available — diff notification disabled."));
+}
 const version = package_json_1.default.version;
 let prevImage = new Map();
 let configObj; // Configuration will be initialized in the load() function
@@ -66,15 +91,57 @@ load();
 function load() {
     console.log(console_log_colors_1.default.yellowBG(" ") + console_log_colors_1.default.italic(` microShot v${version} ` + console_log_colors_1.default.yellowBG(" ")) + console_log_colors_1.default.gray(" nobuoJT"));
     console.log(console_log_colors_1.default.blue("\n (On console) Key input "));
-    console.log("'l' : print window List.\n'L' : print window table.\n'r' : reload .secret.json and reInit \n'exit' : exit.");
+    console.log("'l' : print window List.\n'L' : print window table.\n'r' : reload .secret.json and reInit");
+    console.log("'c' : Capture.\n'on' : start auto diff. 'off' : stop.\n'exit' : exit.");
     console.log(console_log_colors_1.default.blue("\n (Global) Key input"));
     console.log("'R Ctrl' : Capture.\n'F10' : start auto diff notice. 'F9' : stop.");
     console.log("");
     configObj = JSON.parse((0, fs_1.readFileSync)(__dirname + '\\.secret.json', 'utf-8')); // Initialize configuration
     URL = configObj === null || configObj === void 0 ? void 0 : configObj.DISCORD_POST_URL;
 }
-let windows = screenshots.Window.all();
-const keyboard = new GlobalKeyboardListener.GlobalKeyboardListener();
+let windows = [];
+if (screenshotsAvailable) {
+    try {
+        windows = screenshots.Window.all();
+    }
+    catch (err) {
+        console.warn(console_log_colors_1.default.yellow("Failed to enumerate windows from node-screenshots."));
+        windows = [];
+        screenshotsAvailable = false;
+    }
+}
+else {
+    windows = [];
+}
+let keyboard = undefined;
+if (globalHookAvailable) {
+    // Prevent spawn error if native binary was removed by AV or packaging
+    const winKeyExe = path.join(__dirname, 'node_modules', 'node-global-key-listener', 'bin', 'WinKeyServer.exe');
+    if (!fs.existsSync(winKeyExe)) {
+        console.warn(console_log_colors_1.default.yellow(`WinKeyServer.exe not found at ${winKeyExe} — disabling global key hook.`));
+        globalHookAvailable = false;
+        keyboard = undefined;
+    }
+    else {
+        try {
+            keyboard = new GlobalKeyboardListener.GlobalKeyboardListener();
+        }
+        catch (err) {
+            console.warn(console_log_colors_1.default.yellow("Failed to initialize global keyboard hook, falling back to CLI input."));
+            globalHookAvailable = false;
+            keyboard = undefined;
+        }
+    }
+}
+// Catch spawn ENOENT from background native helper and prevent process crash
+process.on('uncaughtException', (err) => {
+    if (err && err.code === 'ENOENT' && typeof err.path === 'string' && err.path.toLowerCase().includes('winkeyserver.exe')) {
+        console.error(console_log_colors_1.default.red(`Ignored missing native helper: ${err.path}`));
+        return;
+    }
+    // rethrow other errors so they are not silently ignored
+    throw err;
+});
 let auto_diff_flag = false;
 //説明
 //標準入力割り込み
@@ -113,39 +180,74 @@ process_1.stdin.addListener("data", (e) => {
         load();
         console.log(".secret.json reloaded");
     }
+    // CLI commands (always enabled)
+    if ((e === null || e === void 0 ? void 0 : e.toString().match(/^\s*c\s*$/i)) || (e === null || e === void 0 ? void 0 : e.toString().match(/^\s*capture\s*$/i))) {
+        captureOneShot();
+    }
+    if (e === null || e === void 0 ? void 0 : e.toString().match(/^\s*(on|start|F10)\s*$/i)) {
+        startAutoDiff();
+    }
+    if (e === null || e === void 0 ? void 0 : e.toString().match(/^\s*(off|stop|F9)\s*$/i)) {
+        stopAutoDiff();
+    }
     //console.log(e?.toString())
 });
 //キーボードイベント割り込み(フォーカス無視)
-keyboard.addListener((event) => {
-    var _a, _b, _c;
+function captureOneShot() {
+    var _a, _b;
     let date = new Date();
-    if (event.name === 'RIGHT CTRL' && event.state === 'DOWN') { //右コントロール　スクショ
-        (_b = (_a = configObj === null || configObj === void 0 ? void 0 : configObj.TARGET_WINDOW) === null || _a === void 0 ? void 0 : _a.ONE_SHOT) === null || _b === void 0 ? void 0 : _b.forEach((tg_window) => {
-            windows.forEach((item, i) => {
-                if (item.appName == tg_window) {
-                    let image = item.captureImageSync();
-                    let filename = `${__dirname}/pix/${item.appName}_${date.toLocaleString().replace(/\//g, "_").replace(/:/g, "_")} ${i}.png`;
-                    if (!fs.existsSync(`${__dirname}/pix`)) {
-                        fs.mkdirSync(`${__dirname}/pix`);
-                    }
-                    fs.writeFileSync(filename, image.toPngSync()); //pix以下に保存
-                    console.log("saved " + filename);
+    if (!screenshotsAvailable) {
+        console.error(console_log_colors_1.default.red("Capture skipped: node-screenshots not available."));
+        return;
+    }
+    (_b = (_a = configObj === null || configObj === void 0 ? void 0 : configObj.TARGET_WINDOW) === null || _a === void 0 ? void 0 : _a.ONE_SHOT) === null || _b === void 0 ? void 0 : _b.forEach((tg_window) => {
+        windows.forEach((item, i) => {
+            if (item.appName == tg_window) {
+                let image = item.captureImageSync();
+                let filename = `${__dirname}/pix/${item.appName}_${date.toLocaleString().replace(/\//g, "_").replace(/:/g, "_")} ${i}.png`;
+                if (!fs.existsSync(`${__dirname}/pix`)) {
+                    fs.mkdirSync(`${__dirname}/pix`);
                 }
-            });
+                fs.writeFileSync(filename, image.toPngSync()); //pix以下に保存
+                console.log("saved " + filename);
+            }
         });
-    }
-    if (event.name === 'F10' && event.state === 'DOWN') { //F10
-        auto_diff_flag = true;
-        console.log(`auto_diff_flag=true (tolerance:${configObj === null || configObj === void 0 ? void 0 : configObj.TOLERANCE}, target:${(_c = configObj === null || configObj === void 0 ? void 0 : configObj.TARGET_WINDOW) === null || _c === void 0 ? void 0 : _c.AUTO})`);
-    }
-    if (event.name === 'F9' && event.state === 'DOWN') { //F9
-        auto_diff_flag = false;
-        console.log("auto_diff_flag=false");
-    }
-});
+    });
+}
+function startAutoDiff() {
+    var _a;
+    auto_diff_flag = true;
+    console.log(`auto_diff_flag=true (tolerance:${configObj === null || configObj === void 0 ? void 0 : configObj.TOLERANCE}, target:${(_a = configObj === null || configObj === void 0 ? void 0 : configObj.TARGET_WINDOW) === null || _a === void 0 ? void 0 : _a.AUTO})`);
+}
+function stopAutoDiff() {
+    auto_diff_flag = false;
+    console.log("auto_diff_flag=false");
+}
+if (globalHookAvailable && keyboard) {
+    keyboard.addListener((event) => {
+        if (!event) {
+            return;
+        }
+        if (event.name === 'RIGHT CTRL' && event.state === 'DOWN') {
+            captureOneShot();
+        }
+        if (event.name === 'F10' && event.state === 'DOWN') {
+            startAutoDiff();
+        }
+        if (event.name === 'F9' && event.state === 'DOWN') {
+            stopAutoDiff();
+        }
+    });
+}
+else {
+    console.log(console_log_colors_1.default.yellow("Global keyboard hook not in use — use CLI commands: 'capture', 'auto on', 'auto off', 'exit'."));
+}
 setInterval(() => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;
     if (!auto_diff_flag) {
+        return;
+    }
+    if (!screenshotsAvailable || !looksSameAvailable) {
         return;
     }
     (_b = (_a = configObj === null || configObj === void 0 ? void 0 : configObj.TARGET_WINDOW) === null || _a === void 0 ? void 0 : _a.AUTO) === null || _b === void 0 ? void 0 : _b.forEach((tg_window) => {
@@ -154,7 +256,13 @@ setInterval(() => __awaiter(void 0, void 0, void 0, function* () {
                 let image = item.captureImageSync();
                 let result;
                 if (prevImage.get(i) !== undefined) {
-                    result = yield looksSame(prevImage.get(i), image.toPngSync(), { tolerance: configObj === null || configObj === void 0 ? void 0 : configObj.TOLERANCE, ignoreAntialiasing: false, antialiasingTolerance: 3 });
+                    try {
+                        result = yield looksSame(prevImage.get(i), image.toPngSync(), { tolerance: configObj === null || configObj === void 0 ? void 0 : configObj.TOLERANCE, ignoreAntialiasing: false, antialiasingTolerance: 3 });
+                    }
+                    catch (err) {
+                        console.error("Error running looks-same:", err);
+                        return;
+                    }
                     console.log("" + `result:${result === null || result === void 0 ? void 0 : result.equal} metaInfo:${result === null || result === void 0 ? void 0 : result.metaInfo} diffBounds:${result === null || result === void 0 ? void 0 : result.diffBounds} diffClusters:${result === null || result === void 0 ? void 0 : result.diffClusters} `);
                     if (false === (result === null || result === void 0 ? void 0 : result.equal)) {
                         try {

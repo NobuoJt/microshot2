@@ -1,6 +1,6 @@
 {
     "name": "microshot",
-    "version": "2.0.6_a",
+    "version": "2.0.7_b",
     "description": "Take some screen shot. and detect difference.",
     "main": "index.js",
     "scripts": {
@@ -10,8 +10,6 @@
         "build_i": "\".\\node_modules\\.bin\\esbuild\" --bundle build/index.js --outfile=build/index_integrated.js --platform=node --external:*.node",
         "build_e": "powershell -c build\\compile_exe.ps1",
         "build_after": "powershell -c build\\getNativeModule_4minimum.ps1",
-        "build:native": "powershell -ExecutionPolicy Bypass -File scripts\\build_native.ps1",
-        "build:pkg": "pnpm run compile && pkg . --targets node16-win-x64 --output dist/microShot.exe",
         "compile": "npm run build_j && npm run build_i && npm run build_e && npm run build_after"
     },
     "keywords": [
@@ -34,6 +32,6 @@
         "typescript": "^5.8.2"
     },
     "devDependencies": {
-        "pkg": "^5.8.1"
+        "tsx": "^4.21.0"
     }
 }

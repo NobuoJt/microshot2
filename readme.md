@@ -1,6 +1,6 @@
 # microShot2 : screen shot tool
 
-v2.0.4_y
+v2.0.7_b
 
 オフフォーカス、1keyでウィンドウのスクショ画像を撮影。
 
