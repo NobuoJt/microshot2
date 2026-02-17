@@ -2,59 +2,70 @@
 
 v2.0.7_b
 
-オフフォーカス、1keyでウィンドウのスクショ画像を撮影。
+オフフォーカス、1keyでウィンドウのスクショ画像を撮影します。
 
 指定秒数ずつ差分をとり、差分が大きい場合は Discord に通知します。
 
-CLI です。
-
-continue from [microShot(Legacy)](https://github.com/NobuoJt/microShot/blob/main/readme.md)
-
-(Private Repo)
+CLI / 配布バイナリで動作します。
 
 ![screenshot](pix/image.png)
 
 ## Usage
 
-`ts-node index.ts` or
+実行方法の例:
 
-`dist/microShot.exe`
+```powershell
+# 開発環境 (TypeScript を直接実行)
+npx tsx .\index.ts
+
+# または pnpm スクリプト
+pnpm start
+
+# 配布済みバイナリ
+.\dist\microShot.exe
+```
 
 ## Key (Focus)
 
-It means console input.
+コンソール入力時のコマンドです。コンソールコマンドは常に有効で、グローバルキーフックが利用できない場合でも操作できます。
 
 ### `l` — Show window list (summary)
 
-- Info by window table
+- ウィンドウの一覧（要約）を表示します。
 
 ### `L` — Show window list (detail)
 
-- appName list
-
-### `exit` — Exit
+- アプリ名リストを表示します。
 
 ### `r` — Reload
 
-- Reload `.secret.json` and reinitialize
+- `.secret.json` を再読み込みして再初期化します。
+
+### `c` / `capture` — One shot capture
+
+- `TARGET_WINDOW.ONE_SHOT` に列挙された `appName` が対象になります。
+
+### `on` / `start` — Start auto diff
+
+- 自動差分監視を開始します（F10 相当）。
+
+### `off` / `stop` — Stop auto diff
+
+- 自動差分監視を停止します（F9 相当）。
+
+### `exit` — Exit
+
+- プログラムを終了します。
 
 ## Key (Global)
 
-Even if the window is not in focus.
+フォーカスに関係なく受け付けるキー操作です（利用可能な場合）。
 
-### `Right Ctrl` — One shot capture
+- `Right Ctrl` — One shot capture
+- `F10` — Start auto diff notice
+- `F9` — Stop diff notice
 
-- `targetWindows.secret` の各行とマッチする appName が対象
-- ファイル名は `pix/{appName}_{YYYY}_{M}_{D} {h}_{m}_{s}`
-
-### `F10` — Start diff notice
-
-- `targetAutoWindows.secret` の各行とマッチする appName が対象
-- `url.secret` の "discord" フィールドにある webhook に通知します
-- 変化がある場合、Discord に通知します (interval=5000ms)
-- diff チャンネル
-
-### `F9` — Stop diff notice
+注意: グローバルキーフックは `node-global-key-listener` とそのネイティブヘルパー (`WinKeyServer.exe`) に依存します。配布物にネイティブバイナリが含まれていない、またはアンチウイルスによってバイナリが削除された場合でも、アプリは落ちずにコンソールコマンドへフォールバックします。
 
 ## `.secret.json` の書き方
 
@@ -75,6 +86,13 @@ Even if the window is not in focus.
 | TARGET_WINDOW / ONE_SHOT | スクショ対象ウィンドウ名 (List) |
 | TARGET_WINDOW / AUTO | diff notice 対象ウィンドウ名 (List) |
 
+## 実行時の注意 / モジュール互換性
+
+- `node-screenshots`（スクリーンキャプチャ）や `looks-same`（差分判定）はネイティブ依存（例: `sharp`）を含みます。これらが正しくインストール/ビルドされていない場合、キャプチャや差分通知機能は無効化され、ログを出力して処理は継続します。
+- `node-global-key-listener` のネイティブヘルパー（`WinKeyServer.exe`）が欠落している場合も、グローバルキーフックは自動的に無効化され、コンソールコマンドでの操作にフォールバックします。
+
+必要であれば配布にネイティブバイナリを同梱するか、AV 側に誤検出レポートを提出してください。
+
 ## npm run スクリプト一覧
 
 ### index.ts → node 実行
@@ -84,10 +102,6 @@ Even if the window is not in focus.
 `rs` — リセット
 
 ### 一連のコンパイル
-
-以下のスクリプトを逐次実行してください。
-
-_ルートディレクトリで行ってください。_
 
 `npm run compile` — js → ts → cjs → blob → exe
 
@@ -101,8 +115,7 @@ _ルートディレクトリで行ってください。_
 
 ### exe 化
 
-Node の新機能 SEA を使う。
-試験機能のため警告が出る場合があります。
+Node の新機能 SEA を使う。試験機能のため警告が出る場合があります。
 
 `npm run build_e`
 
