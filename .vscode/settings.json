@@ -6,7 +6,9 @@
         "microshot",
         "Mikeal",
         "postject",
-        "Ridgewell"],
+        "Ridgewell",
+        "winkeyserver"
+    ],
     "cSpell.ignorePaths":["**/node_modules/**","license_detail/**"],
     "json.schemas": [
         {

@@ -7,7 +7,7 @@ try{
     }
 
     $renamed = $false
-    if ( (Test-Path "node_modules")) {
+    if ( (Test-Path "node_modules") -and -not (Test-Path "_node_modules")) {
         Write-Host "最小構成隔離のため、親のnode_modulesを一時的にリネーム"
         try {
             Rename-Item -Path "node_modules" -NewName "_node_modules" -ErrorAction Stop
@@ -26,7 +26,7 @@ try{
     while ($true) {
         Write-Host "動作確認開始(不動時、正常動作後pause使用の可能性)"
         # 3. microShot.exe実行してエラーキャプチャ
-        $output = & .\dist\microShot.exe 2>&1
+        $output = "exit`n" | & .\dist\microShot.exe 2>&1
 
         # nullチェック
         if (-not $output) {
@@ -81,7 +81,7 @@ catch{
 }
 
 finally{
-    if ( (Test-Path "_node_modules")) {
+    if ($renamed -and (Test-Path "_node_modules")) {
         Write-Host "最小構成隔離のため、一時的にリネームした親のnode_modulesを元に戻す"
         Rename-Item -Path "_node_modules" -NewName "node_modules" | Out-Null
     }

@@ -53,11 +53,19 @@ const requireFromDisk = (0, module_1.createRequire)(__filename);
 const package_json_1 = __importDefault(require("./package.json"));
 const process_1 = require("process");
 const console_log_colors_1 = __importDefault(require("console-log-colors"));
-//import { screenshots } from 'node-screenshots';
-let screenshots = undefined;
+let screenshots; // node-screenshotsモジュールのインスタンスを格納する変数
 let screenshotsAvailable = false;
 try {
-    screenshots = requireFromDisk(__dirname + '\\node_modules\\node-screenshots\\index.js');
+    const screenshotModulePaths = [
+        path.join(__dirname, 'node_modules', 'node-screenshots'), // １：このスクリプトのディレクトリ内のnode_modules
+        path.join(process.cwd(), 'node_modules', 'node-screenshots'), // ２：実行ディレクトリのnode_modules
+        path.join(__dirname, '..', 'node_modules', 'node-screenshots'), // ３：このスクリプトの親ディレクトリのnode_modules
+    ];
+    const screenshotModulePath = screenshotModulePaths.find((candidate) => fs.existsSync(candidate)); // 最初の存在するパスを取得
+    if (!screenshotModulePath) {
+        throw new Error('node-screenshots module not found');
+    }
+    screenshots = requireFromDisk(screenshotModulePath);
     screenshotsAvailable = true;
 }
 catch (err) {
@@ -96,13 +104,26 @@ function load() {
     console.log(console_log_colors_1.default.blue("\n (Global) Key input"));
     console.log("'R Ctrl' : Capture.\n'F10' : start auto diff notice. 'F9' : stop.");
     console.log("");
-    configObj = JSON.parse((0, fs_1.readFileSync)(__dirname + '\\.secret.json', 'utf-8')); // Initialize configuration
+    const configPath = [
+        path.join(__dirname, '.secret.json'), // １：カレントディレクトリ
+        path.join(process.cwd(), '.secret.json'), // ２：実行ディレクトリ
+        path.join(__dirname, '..', '.secret.json'), // ３：親ディレクトリ
+    ].find((candidate) => fs.existsSync(candidate)); // 最初の存在するパスを取得
+    if (!configPath) {
+        throw new Error('Could not find .secret.json');
+    }
+    configObj = JSON.parse((0, fs_1.readFileSync)(configPath, 'utf-8')); // Initialize configuration
     URL = configObj === null || configObj === void 0 ? void 0 : configObj.DISCORD_POST_URL;
 }
-let windows = [];
+let windows = []; // ウィンドウの配列
+/*** ウィンドウのプロパティを取得する */
+function windowValue(target, property) {
+    const value = target[property]; // 指定されたプロパティの値を取得
+    return typeof value === 'function' ? value.call(target) : value; // 値が関数の場合には実行して結果を返す
+}
 if (screenshotsAvailable) {
     try {
-        windows = screenshots.Window.all();
+        windows = screenshots.Window.all(); // ウィンドウの配列を取得(windowを持たない場合は空配列)
     }
     catch (err) {
         console.warn(console_log_colors_1.default.yellow("Failed to enumerate windows from node-screenshots."));
@@ -149,26 +170,26 @@ process_1.stdin.addListener("data", (e) => {
     if (e === null || e === void 0 ? void 0 : e.toString().match("L")) { ///L ウィンドウリストの表示
         windows.forEach((item) => {
             console.table({
-                id: item.id(),
-                appName: item.appName(),
-                title: item.title(),
-                currentMonitor: item.currentMonitor().id,
-                x: item.x(),
-                y: item.y(),
-                width: item.width(),
-                height: item.height(),
+                id: windowValue(item, 'id'),
+                appName: windowValue(item, 'appName'),
+                title: windowValue(item, 'title'),
+                currentMonitor: windowValue(windowValue(item, 'currentMonitor'), 'id'),
+                x: windowValue(item, 'x'),
+                y: windowValue(item, 'y'),
+                width: windowValue(item, 'width'),
+                height: windowValue(item, 'height'),
                 //rotation: item.rotation(),
                 //scaleFactor: item.scaleFactor(),
                 //isPrimary: item.isPrimary(),
-                isMinimized: item.isMinimized(),
-                isMaximized: item.isMaximized(),
+                isMinimized: windowValue(item, 'isMinimized'),
+                isMaximized: windowValue(item, 'isMaximized'),
             });
         });
     }
     if (e === null || e === void 0 ? void 0 : e.toString().match("l")) { ///l アプリ名のみ
         windows.forEach((item) => {
             console.log({
-                appName: item.appName(),
+                appName: windowValue(item, 'appName'),
             });
         });
     }
@@ -202,11 +223,15 @@ function captureOneShot() {
     }
     (_b = (_a = configObj === null || configObj === void 0 ? void 0 : configObj.TARGET_WINDOW) === null || _a === void 0 ? void 0 : _a.ONE_SHOT) === null || _b === void 0 ? void 0 : _b.forEach((tg_window) => {
         windows.forEach((item, i) => {
-            if (item.appName() == tg_window) {
-                let image = item.captureImageSync();
-                let filename = `${__dirname}/pix/${item.appName()}_${date.toLocaleString().replace(/\//g, "_").replace(/:/g, "_")} ${i}.png`;
+            if (windowValue(item, 'appName') == tg_window) { // ターゲットウィンドウのアプリ名と一致する場合にキャプチャ
+                let image = windowValue(item, 'captureImageSync'); // キャプチャ画像を取得(型はScreenshotWindow.captureImageSyncの戻り値)
+                let filename = `${__dirname}/pix/${windowValue(item, 'appName')}_${date.toLocaleString().replace(/\//g, "_").replace(/:/g, "_")} ${i}.png`; // 保存するファイル名を作成
                 if (!fs.existsSync(`${__dirname}/pix`)) {
                     fs.mkdirSync(`${__dirname}/pix`);
+                }
+                if (image === undefined || image.width === 0 || image.height === 0) {
+                    console.error(console_log_colors_1.default.red("Capture failed: image is invalid."));
+                    return;
                 }
                 fs.writeFileSync(filename, image.toPngSync()); //pix以下に保存
                 console.log("saved " + filename);
@@ -252,8 +277,12 @@ setInterval(() => __awaiter(void 0, void 0, void 0, function* () {
     }
     (_b = (_a = configObj === null || configObj === void 0 ? void 0 : configObj.TARGET_WINDOW) === null || _a === void 0 ? void 0 : _a.AUTO) === null || _b === void 0 ? void 0 : _b.forEach((tg_window) => {
         windows.forEach((item, i) => __awaiter(void 0, void 0, void 0, function* () {
-            if (item.appName == tg_window) {
-                let image = item.captureImageSync();
+            if (windowValue(item, 'appName') == tg_window) { // ターゲットウィンドウのアプリ名と一致する場合
+                let image = windowValue(item, 'captureImageSync'); // キャプチャ画像を取得(型はScreenshotWindow.captureImageSyncの戻り値)
+                if (image === undefined || image.width === 0 || image.height === 0) {
+                    console.error(console_log_colors_1.default.red("Capture failed: image is invalid."));
+                    return;
+                } // 画像が無効な場合エラーを表示
                 let result;
                 if (prevImage.get(i) !== undefined) {
                     try {
@@ -267,7 +296,10 @@ setInterval(() => __awaiter(void 0, void 0, void 0, function* () {
                     if (false === (result === null || result === void 0 ? void 0 : result.equal)) {
                         try {
                             const formData = new FormData();
-                            formData.append('file', new Blob([image.toPngSync()], { type: 'image/png' }), 'file.png');
+                            const png = image.toPngSync(); // Capture the current image as PNG
+                            const pngBuffer = new ArrayBuffer(png.byteLength); // Create an ArrayBuffer of the same length
+                            new Uint8Array(pngBuffer).set(png); // Copy the PNG data into the ArrayBuffer
+                            formData.append('file', new Blob([pngBuffer], { type: 'image/png' }), 'file.png');
                             const response = yield fetch(URL, {
                                 method: 'POST',
                                 body: formData

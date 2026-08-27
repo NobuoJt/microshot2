@@ -7,11 +7,19 @@ import packageJson from "./package.json"
 import { stdin } from "process";
 import lc from "console-log-colors"
 
-//import { screenshots } from 'node-screenshots';
-let screenshots: any = undefined;
+type ScreenshotsModule = typeof import('node-screenshots');        // node-screenshotsの型
+type ScreenshotWindow = InstanceType<ScreenshotsModule['Window']>; // Windowクラスのインスタンス型
+let screenshots: ScreenshotsModule | undefined;                    // node-screenshotsモジュールのインスタンスを格納する変数
 let screenshotsAvailable = false;
 try {
-    screenshots = requireFromDisk(__dirname+'\\node_modules\\node-screenshots\\index.js');
+    const screenshotModulePaths = [ // node-screenshotsのモジュールパスを複数候補として指定
+        path.join(__dirname, 'node_modules', 'node-screenshots'),           // １：このスクリプトのディレクトリ内のnode_modules
+        path.join(process.cwd(), 'node_modules', 'node-screenshots'),       // ２：実行ディレクトリのnode_modules
+        path.join(__dirname, '..', 'node_modules', 'node-screenshots'),     // ３：このスクリプトの親ディレクトリのnode_modules
+    ];
+    const screenshotModulePath = screenshotModulePaths.find((candidate) => fs.existsSync(candidate)); // 最初の存在するパスを取得
+    if (!screenshotModulePath) { throw new Error('node-screenshots module not found'); }
+    screenshots = requireFromDisk(screenshotModulePath);
     screenshotsAvailable = true;
 } catch (err) {
     console.warn(lc.yellow("node-screenshots not available — capture features disabled."));
@@ -55,16 +63,29 @@ function load(){
     console.log(lc.blue("\n (Global) Key input"))
     console.log("'R Ctrl' : Capture.\n'F10' : start auto diff notice. 'F9' : stop.")
     console.log("")
-    configObj = JSON.parse(readFileSync(__dirname + '\\.secret.json', 'utf-8')); // Initialize configuration
+    const configPath = [
+        path.join(__dirname, '.secret.json'),     // １：カレントディレクトリ
+        path.join(process.cwd(), '.secret.json'), // ２：実行ディレクトリ
+        path.join(__dirname, '..', '.secret.json'), // ３：親ディレクトリ
+    ].find((candidate) => fs.existsSync(candidate)); // 最初の存在するパスを取得
+    if (!configPath) { throw new Error('Could not find .secret.json'); }
+    configObj = JSON.parse(readFileSync(configPath, 'utf-8')); // Initialize configuration
     URL=configObj?.DISCORD_POST_URL
 }
 
 
 
-let windows: any[] = [];
+let windows: ScreenshotWindow[] = [];       // ウィンドウの配列
+
+/*** ウィンドウのプロパティを取得する */
+function windowValue<T>(target: object, property: string): T {                      // Tは取得するプロパティの型(ジェネリクス)
+    const value = (target as Record<string, T | (() => T)>)[property];              // 指定されたプロパティの値を取得
+    return typeof value === 'function' ? (value as () => T).call(target) : value;   // 値が関数の場合には実行して結果を返す
+}
+
 if (screenshotsAvailable) {
     try {
-        windows = screenshots.Window.all();
+        windows = screenshots!.Window.all(); // ウィンドウの配列を取得(windowを持たない場合は空配列)
     } catch (err) {
         console.warn(lc.yellow("Failed to enumerate windows from node-screenshots."));
         windows = [];
@@ -109,28 +130,28 @@ let auto_diff_flag=false
 //標準入力割り込み
 stdin.addListener("data",(e)=>{
     if (e?.toString().match("L")){///L ウィンドウリストの表示
-        windows.forEach((item:any) => {
+        windows.forEach((item: ScreenshotWindow) => { // ウィンドウのプロパティを取得して表示
             console.table({
-                id: item.id(),
-                appName: item.appName(),
-                title: item.title(),
-                currentMonitor: item.currentMonitor().id,
-                x: item.x(),
-                y: item.y(),
-                width: item.width(),
-                height: item.height(),
+                id: windowValue<number>(item, 'id'),
+                appName: windowValue<string>(item, 'appName'),
+                title: windowValue<string>(item, 'title'),
+                currentMonitor: windowValue<number>(windowValue<object>(item, 'currentMonitor'), 'id'),
+                x: windowValue<number>(item, 'x'),
+                y: windowValue<number>(item, 'y'),
+                width: windowValue<number>(item, 'width'),
+                height: windowValue<number>(item, 'height'),
                 //rotation: item.rotation(),
                 //scaleFactor: item.scaleFactor(),
                 //isPrimary: item.isPrimary(),
-                isMinimized: item.isMinimized(),
-                isMaximized: item.isMaximized(),
+                isMinimized: windowValue<boolean>(item, 'isMinimized'),
+                isMaximized: windowValue<boolean>(item, 'isMaximized'),
             });
         });
     }
     if (e?.toString().match("l")){///l アプリ名のみ
-        windows.forEach((item:any) => {
+        windows.forEach((item: ScreenshotWindow) => {
             console.log({
-                appName: item.appName(),
+                appName: windowValue<string>(item, 'appName'),
             });
         });
     }
@@ -160,11 +181,12 @@ function captureOneShot() {
     let date = new Date();
     if (!screenshotsAvailable) { console.error(lc.red("Capture skipped: node-screenshots not available.")); return }
     configObj?.TARGET_WINDOW?.ONE_SHOT?.forEach((tg_window) => {
-        windows.forEach((item: any, i: Number) => {
-            if (item.appName() == tg_window) {
-                let image = item.captureImageSync()
-                let filename = `${__dirname}/pix/${item.appName()}_${date.toLocaleString().replace(/\//g, "_").replace(/:/g, "_")} ${i}.png`
+        windows.forEach((item: ScreenshotWindow, i: number) => {
+            if (windowValue<string>(item, 'appName') == tg_window) {          // ターゲットウィンドウのアプリ名と一致する場合にキャプチャ
+                let image = windowValue<ReturnType<ScreenshotWindow['captureImageSync']>>(item, 'captureImageSync') // キャプチャ画像を取得(型はScreenshotWindow.captureImageSyncの戻り値)
+                let filename = `${__dirname}/pix/${windowValue<string>(item, 'appName')}_${date.toLocaleString().replace(/\//g, "_").replace(/:/g, "_")} ${i}.png` // 保存するファイル名を作成
                 if (!fs.existsSync(`${__dirname}/pix`)) { fs.mkdirSync(`${__dirname}/pix`) }
+                if (image === undefined || image.width === 0 || image.height === 0) { console.error(lc.red("Capture failed: image is invalid.")); return }
                 fs.writeFileSync(filename, image.toPngSync());//pix以下に保存
                 console.log("saved " + filename)
             }
@@ -204,9 +226,10 @@ setInterval(async () => {
     if(!auto_diff_flag){return}
     if (!screenshotsAvailable || !looksSameAvailable) { return }
     configObj?.TARGET_WINDOW?.AUTO?.forEach((tg_window)=>{
-        windows.forEach(async (item:any,i:number) => {
-            if(item.appName==tg_window){
-                let image=item.captureImageSync()
+        windows.forEach(async (item: ScreenshotWindow, i: number) => { // ターゲットウィンドウのアプリ名と一致する場合にキャプチャ
+            if(windowValue<string>(item, 'appName')==tg_window){       // ターゲットウィンドウのアプリ名と一致する場合
+                let image=windowValue<ReturnType<ScreenshotWindow['captureImageSync']>>(item, 'captureImageSync') // キャプチャ画像を取得(型はScreenshotWindow.captureImageSyncの戻り値)
+                if (image === undefined || image.width === 0 || image.height === 0) { console.error(lc.red("Capture failed: image is invalid.")); return } // 画像が無効な場合エラーを表示
                 let result
                 if(prevImage.get(i)!==undefined){
                     try{
@@ -220,7 +243,10 @@ setInterval(async () => {
                     if(false===result?.equal){
                         try{
                             const formData = new FormData()
-                            formData.append('file', new Blob([image.toPngSync()], { type: 'image/png' }), 'file.png')
+                            const png = image.toPngSync() // Capture the current image as PNG
+                            const pngBuffer: ArrayBuffer = new ArrayBuffer(png.byteLength) // Create an ArrayBuffer of the same length
+                            new Uint8Array(pngBuffer).set(png) // Copy the PNG data into the ArrayBuffer
+                            formData.append('file', new Blob([pngBuffer], { type: 'image/png' }), 'file.png')
                             const response = await fetch(URL, {
                                 method: 'POST',
                                 body: formData

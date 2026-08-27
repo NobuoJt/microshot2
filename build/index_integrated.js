@@ -13,14 +13,14 @@ var require_package = __commonJS({
   "build/package.json"(exports2, module2) {
     module2.exports = {
       name: "microshot",
-      version: "2.0.9_d",
+      version: "2.0.11_f",
       description: "Take some screen shot. and detect difference.",
       main: "index.js",
       scripts: {
         start: "npm run build:live",
         "build:live": `nodemon --watch 'index.ts' --exec "tsx" index.ts & tsc -p .`,
         build_j: "tsc -p .",
-        build_i: '".\\node_modules\\.bin\\esbuild" --bundle build/index.js --outfile=build/index_integrated.js --platform=node --external:*.node',
+        build_i: '".\\node_modules\\.bin\\esbuild" --bundle build/index.js --outfile=build/index_integrated.js --platform=node --external:node-screenshots --external:node-screenshots-*',
         build_e: "powershell -c build\\compile_exe.ps1",
         build_after: "powershell -c build\\getNativeModule_4minimum.ps1",
         compile: "npm run build_j && npm run build_i && npm run build_e && npm run build_after"
@@ -305,10 +305,22 @@ var requireFromDisk = (0, module_1.createRequire)(__filename);
 var package_json_1 = __importDefault(require_package());
 var process_1 = require("process");
 var console_log_colors_1 = __importDefault(require_src());
-var screenshots = void 0;
+var screenshots;
 var screenshotsAvailable = false;
 try {
-  screenshots = requireFromDisk(__dirname + "\\node_modules\\node-screenshots\\index.js");
+  const screenshotModulePaths = [
+    path.join(__dirname, "node_modules", "node-screenshots"),
+    // １：このスクリプトのディレクトリ内のnode_modules
+    path.join(process.cwd(), "node_modules", "node-screenshots"),
+    // ２：実行ディレクトリのnode_modules
+    path.join(__dirname, "..", "node_modules", "node-screenshots")
+    // ３：このスクリプトの親ディレクトリのnode_modules
+  ];
+  const screenshotModulePath = screenshotModulePaths.find((candidate) => fs.existsSync(candidate));
+  if (!screenshotModulePath) {
+    throw new Error("node-screenshots module not found");
+  }
+  screenshots = requireFromDisk(screenshotModulePath);
   screenshotsAvailable = true;
 } catch (err) {
   console.warn(console_log_colors_1.default.yellow("node-screenshots not available \u2014 capture features disabled."));
@@ -342,10 +354,25 @@ function load() {
   console.log(console_log_colors_1.default.blue("\n (Global) Key input"));
   console.log("'R Ctrl' : Capture.\n'F10' : start auto diff notice. 'F9' : stop.");
   console.log("");
-  configObj = JSON.parse((0, fs_1.readFileSync)(__dirname + "\\.secret.json", "utf-8"));
+  const configPath = [
+    path.join(__dirname, ".secret.json"),
+    // １：カレントディレクトリ
+    path.join(process.cwd(), ".secret.json"),
+    // ２：実行ディレクトリ
+    path.join(__dirname, "..", ".secret.json")
+    // ３：親ディレクトリ
+  ].find((candidate) => fs.existsSync(candidate));
+  if (!configPath) {
+    throw new Error("Could not find .secret.json");
+  }
+  configObj = JSON.parse((0, fs_1.readFileSync)(configPath, "utf-8"));
   URL = configObj === null || configObj === void 0 ? void 0 : configObj.DISCORD_POST_URL;
 }
 var windows = [];
+function windowValue(target, property) {
+  const value = target[property];
+  return typeof value === "function" ? value.call(target) : value;
+}
 if (screenshotsAvailable) {
   try {
     windows = screenshots.Window.all();
@@ -386,26 +413,26 @@ process_1.stdin.addListener("data", (e) => {
   if (e === null || e === void 0 ? void 0 : e.toString().match("L")) {
     windows.forEach((item) => {
       console.table({
-        id: item.id(),
-        appName: item.appName(),
-        title: item.title(),
-        currentMonitor: item.currentMonitor().id,
-        x: item.x(),
-        y: item.y(),
-        width: item.width(),
-        height: item.height(),
+        id: windowValue(item, "id"),
+        appName: windowValue(item, "appName"),
+        title: windowValue(item, "title"),
+        currentMonitor: windowValue(windowValue(item, "currentMonitor"), "id"),
+        x: windowValue(item, "x"),
+        y: windowValue(item, "y"),
+        width: windowValue(item, "width"),
+        height: windowValue(item, "height"),
         //rotation: item.rotation(),
         //scaleFactor: item.scaleFactor(),
         //isPrimary: item.isPrimary(),
-        isMinimized: item.isMinimized(),
-        isMaximized: item.isMaximized()
+        isMinimized: windowValue(item, "isMinimized"),
+        isMaximized: windowValue(item, "isMaximized")
       });
     });
   }
   if (e === null || e === void 0 ? void 0 : e.toString().match("l")) {
     windows.forEach((item) => {
       console.log({
-        appName: item.appName()
+        appName: windowValue(item, "appName")
       });
     });
   }
@@ -436,11 +463,15 @@ function captureOneShot() {
   }
   (_b = (_a = configObj === null || configObj === void 0 ? void 0 : configObj.TARGET_WINDOW) === null || _a === void 0 ? void 0 : _a.ONE_SHOT) === null || _b === void 0 ? void 0 : _b.forEach((tg_window) => {
     windows.forEach((item, i2) => {
-      if (item.appName() == tg_window) {
-        let image = item.captureImageSync();
-        let filename = `${__dirname}/pix/${item.appName()}_${date.toLocaleString().replace(/\//g, "_").replace(/:/g, "_")} ${i2}.png`;
+      if (windowValue(item, "appName") == tg_window) {
+        let image = windowValue(item, "captureImageSync");
+        let filename = `${__dirname}/pix/${windowValue(item, "appName")}_${date.toLocaleString().replace(/\//g, "_").replace(/:/g, "_")} ${i2}.png`;
         if (!fs.existsSync(`${__dirname}/pix`)) {
           fs.mkdirSync(`${__dirname}/pix`);
+        }
+        if (image === void 0 || image.width === 0 || image.height === 0) {
+          console.error(console_log_colors_1.default.red("Capture failed: image is invalid."));
+          return;
         }
         fs.writeFileSync(filename, image.toPngSync());
         console.log("saved " + filename);
@@ -485,8 +516,12 @@ setInterval(() => __awaiter(void 0, void 0, void 0, function* () {
   }
   (_b = (_a = configObj === null || configObj === void 0 ? void 0 : configObj.TARGET_WINDOW) === null || _a === void 0 ? void 0 : _a.AUTO) === null || _b === void 0 ? void 0 : _b.forEach((tg_window) => {
     windows.forEach((item, i2) => __awaiter(void 0, void 0, void 0, function* () {
-      if (item.appName == tg_window) {
-        let image = item.captureImageSync();
+      if (windowValue(item, "appName") == tg_window) {
+        let image = windowValue(item, "captureImageSync");
+        if (image === void 0 || image.width === 0 || image.height === 0) {
+          console.error(console_log_colors_1.default.red("Capture failed: image is invalid."));
+          return;
+        }
         let result;
         if (prevImage.get(i2) !== void 0) {
           try {
@@ -499,7 +534,10 @@ setInterval(() => __awaiter(void 0, void 0, void 0, function* () {
           if (false === (result === null || result === void 0 ? void 0 : result.equal)) {
             try {
               const formData = new FormData();
-              formData.append("file", new Blob([image.toPngSync()], { type: "image/png" }), "file.png");
+              const png = image.toPngSync();
+              const pngBuffer = new ArrayBuffer(png.byteLength);
+              new Uint8Array(pngBuffer).set(png);
+              formData.append("file", new Blob([pngBuffer], { type: "image/png" }), "file.png");
               const response = yield fetch(URL, {
                 method: "POST",
                 body: formData
