@@ -1,11 +1,11 @@
 {
     "name": "microshot",
-    "version": "2.0.8_c",
+    "version": "2.0.9_d",
     "description": "Take some screen shot. and detect difference.",
     "main": "index.js",
     "scripts": {
         "start": "npm run build:live",
-        "build:live": "nodemon --watch 'index.ts' --exec \"ts-node\" index.ts & tsc -p .",
+        "build:live": "nodemon --watch 'index.ts' --exec \"tsx\" index.ts & tsc -p .",
         "build_j": "tsc -p .",
         "build_i": "\".\\node_modules\\.bin\\esbuild\" --bundle build/index.js --outfile=build/index_integrated.js --platform=node --external:*.node",
         "build_e": "powershell -c build\\compile_exe.ps1",
@@ -18,20 +18,19 @@
     "author": "nobuoJT",
     "license": "ISC",
     "dependencies": {
-        "@esbuild/win32-x64": "^0.25.4",
-        "@types/node": "^22.13.14",
+        "@esbuild/win32-x64": "^0.28.2",
+        "@types/node": "^26.4.0",
         "console-log-colors": "^0.5.0",
-        "esbuild": "^0.25.3",
+        "esbuild": "^0.28.2",
         "license-checker": "^25.0.1",
-        "looks-same": "^9.0.1",
+        "looks-same": "^10.0.1",
         "node-global-key-listener": "^0.3.0",
-        "node-screenshots": "^0.2.1",
-        "nodemon": "^3.1.9",
-        "sharp": "^0.34.5",
-        "ts-node": "^10.9.2",
-        "typescript": "^5.8.2"
+        "node-screenshots": "^0.2.8",
+        "nodemon": "^3.1.14",
+        "sharp": "^0.35.4"
     },
     "devDependencies": {
-        "tsx": "^4.21.0"
+        "tsx": "^4.23.12",
+        "typescript": "^6.0.3"
     }
 }

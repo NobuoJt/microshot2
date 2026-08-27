@@ -1,7 +1,11 @@
 "use strict";
 var __getOwnPropNames = Object.getOwnPropertyNames;
 var __commonJS = (cb, mod) => function __require() {
-  return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+  try {
+    return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+  } catch (e) {
+    throw mod = 0, e;
+  }
 };
 
 // build/package.json
@@ -9,12 +13,12 @@ var require_package = __commonJS({
   "build/package.json"(exports2, module2) {
     module2.exports = {
       name: "microshot",
-      version: "2.0.8_c",
+      version: "2.0.9_d",
       description: "Take some screen shot. and detect difference.",
       main: "index.js",
       scripts: {
         start: "npm run build:live",
-        "build:live": `nodemon --watch 'index.ts' --exec "ts-node" index.ts & tsc -p .`,
+        "build:live": `nodemon --watch 'index.ts' --exec "tsx" index.ts & tsc -p .`,
         build_j: "tsc -p .",
         build_i: '".\\node_modules\\.bin\\esbuild" --bundle build/index.js --outfile=build/index_integrated.js --platform=node --external:*.node',
         build_e: "powershell -c build\\compile_exe.ps1",
@@ -27,21 +31,20 @@ var require_package = __commonJS({
       author: "nobuoJT",
       license: "ISC",
       dependencies: {
-        "@esbuild/win32-x64": "^0.25.4",
-        "@types/node": "^22.13.14",
+        "@esbuild/win32-x64": "^0.28.2",
+        "@types/node": "^26.4.0",
         "console-log-colors": "^0.5.0",
-        esbuild: "^0.25.3",
+        esbuild: "^0.28.2",
         "license-checker": "^25.0.1",
-        "looks-same": "^9.0.1",
+        "looks-same": "^10.0.1",
         "node-global-key-listener": "^0.3.0",
-        "node-screenshots": "^0.2.1",
-        nodemon: "^3.1.9",
-        sharp: "^0.34.5",
-        "ts-node": "^10.9.2",
-        typescript: "^5.8.2"
+        "node-screenshots": "^0.2.8",
+        nodemon: "^3.1.14",
+        sharp: "^0.35.4"
       },
       devDependencies: {
-        tsx: "^4.21.0"
+        tsx: "^4.23.12",
+        typescript: "^6.0.3"
       }
     };
   }
@@ -383,26 +386,26 @@ process_1.stdin.addListener("data", (e) => {
   if (e === null || e === void 0 ? void 0 : e.toString().match("L")) {
     windows.forEach((item) => {
       console.table({
-        id: item.id,
-        appName: item.appName,
-        title: item.title,
-        currentMonitor: item.currentMonitor.id,
-        x: item.x,
-        y: item.y,
-        width: item.width,
-        height: item.height,
-        //rotation: item.rotation,
-        //scaleFactor: item.scaleFactor,
-        //isPrimary: item.isPrimary,
-        isMinimized: item.isMinimized,
-        isMaximized: item.isMaximized
+        id: item.id(),
+        appName: item.appName(),
+        title: item.title(),
+        currentMonitor: item.currentMonitor().id,
+        x: item.x(),
+        y: item.y(),
+        width: item.width(),
+        height: item.height(),
+        //rotation: item.rotation(),
+        //scaleFactor: item.scaleFactor(),
+        //isPrimary: item.isPrimary(),
+        isMinimized: item.isMinimized(),
+        isMaximized: item.isMaximized()
       });
     });
   }
   if (e === null || e === void 0 ? void 0 : e.toString().match("l")) {
     windows.forEach((item) => {
       console.log({
-        appName: item.appName
+        appName: item.appName()
       });
     });
   }
@@ -433,9 +436,9 @@ function captureOneShot() {
   }
   (_b = (_a = configObj === null || configObj === void 0 ? void 0 : configObj.TARGET_WINDOW) === null || _a === void 0 ? void 0 : _a.ONE_SHOT) === null || _b === void 0 ? void 0 : _b.forEach((tg_window) => {
     windows.forEach((item, i2) => {
-      if (item.appName == tg_window) {
+      if (item.appName() == tg_window) {
         let image = item.captureImageSync();
-        let filename = `${__dirname}/pix/${item.appName}_${date.toLocaleString().replace(/\//g, "_").replace(/:/g, "_")} ${i2}.png`;
+        let filename = `${__dirname}/pix/${item.appName()}_${date.toLocaleString().replace(/\//g, "_").replace(/:/g, "_")} ${i2}.png`;
         if (!fs.existsSync(`${__dirname}/pix`)) {
           fs.mkdirSync(`${__dirname}/pix`);
         }
