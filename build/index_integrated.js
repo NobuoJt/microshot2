@@ -13,12 +13,12 @@ var require_package = __commonJS({
   "build/package.json"(exports2, module2) {
     module2.exports = {
       name: "microshot",
-      version: "2.0.8_c",
+      version: "2.0.9_d",
       description: "Take some screen shot. and detect difference.",
       main: "index.js",
       scripts: {
         start: "npm run build:live",
-        "build:live": `nodemon --watch 'index.ts' --exec "ts-node" index.ts & tsc -p .`,
+        "build:live": `nodemon --watch 'index.ts' --exec "tsx" index.ts & tsc -p .`,
         build_j: "tsc -p .",
         build_i: '".\\node_modules\\.bin\\esbuild" --bundle build/index.js --outfile=build/index_integrated.js --platform=node --external:*.node',
         build_e: "powershell -c build\\compile_exe.ps1",
@@ -40,12 +40,11 @@ var require_package = __commonJS({
         "node-global-key-listener": "^0.3.0",
         "node-screenshots": "^0.2.8",
         nodemon: "^3.1.14",
-        sharp: "^0.35.4",
-        "ts-node": "^10.9.2",
-        typescript: "^7.0.2"
+        sharp: "^0.35.4"
       },
       devDependencies: {
-        tsx: "^4.23.12"
+        tsx: "^4.23.12",
+        typescript: "^6.0.3"
       }
     };
   }
@@ -387,26 +386,26 @@ process_1.stdin.addListener("data", (e) => {
   if (e === null || e === void 0 ? void 0 : e.toString().match("L")) {
     windows.forEach((item) => {
       console.table({
-        id: item.id,
-        appName: item.appName,
-        title: item.title,
-        currentMonitor: item.currentMonitor.id,
-        x: item.x,
-        y: item.y,
-        width: item.width,
-        height: item.height,
-        //rotation: item.rotation,
-        //scaleFactor: item.scaleFactor,
-        //isPrimary: item.isPrimary,
-        isMinimized: item.isMinimized,
-        isMaximized: item.isMaximized
+        id: item.id(),
+        appName: item.appName(),
+        title: item.title(),
+        currentMonitor: item.currentMonitor().id,
+        x: item.x(),
+        y: item.y(),
+        width: item.width(),
+        height: item.height(),
+        //rotation: item.rotation(),
+        //scaleFactor: item.scaleFactor(),
+        //isPrimary: item.isPrimary(),
+        isMinimized: item.isMinimized(),
+        isMaximized: item.isMaximized()
       });
     });
   }
   if (e === null || e === void 0 ? void 0 : e.toString().match("l")) {
     windows.forEach((item) => {
       console.log({
-        appName: item.appName
+        appName: item.appName()
       });
     });
   }
@@ -437,9 +436,9 @@ function captureOneShot() {
   }
   (_b = (_a = configObj === null || configObj === void 0 ? void 0 : configObj.TARGET_WINDOW) === null || _a === void 0 ? void 0 : _a.ONE_SHOT) === null || _b === void 0 ? void 0 : _b.forEach((tg_window) => {
     windows.forEach((item, i2) => {
-      if (item.appName == tg_window) {
+      if (item.appName() == tg_window) {
         let image = item.captureImageSync();
-        let filename = `${__dirname}/pix/${item.appName}_${date.toLocaleString().replace(/\//g, "_").replace(/:/g, "_")} ${i2}.png`;
+        let filename = `${__dirname}/pix/${item.appName()}_${date.toLocaleString().replace(/\//g, "_").replace(/:/g, "_")} ${i2}.png`;
         if (!fs.existsSync(`${__dirname}/pix`)) {
           fs.mkdirSync(`${__dirname}/pix`);
         }

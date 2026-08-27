@@ -149,26 +149,26 @@ process_1.stdin.addListener("data", (e) => {
     if (e === null || e === void 0 ? void 0 : e.toString().match("L")) { ///L ウィンドウリストの表示
         windows.forEach((item) => {
             console.table({
-                id: item.id,
-                appName: item.appName,
-                title: item.title,
-                currentMonitor: item.currentMonitor.id,
-                x: item.x,
-                y: item.y,
-                width: item.width,
-                height: item.height,
-                //rotation: item.rotation,
-                //scaleFactor: item.scaleFactor,
-                //isPrimary: item.isPrimary,
-                isMinimized: item.isMinimized,
-                isMaximized: item.isMaximized,
+                id: item.id(),
+                appName: item.appName(),
+                title: item.title(),
+                currentMonitor: item.currentMonitor().id,
+                x: item.x(),
+                y: item.y(),
+                width: item.width(),
+                height: item.height(),
+                //rotation: item.rotation(),
+                //scaleFactor: item.scaleFactor(),
+                //isPrimary: item.isPrimary(),
+                isMinimized: item.isMinimized(),
+                isMaximized: item.isMaximized(),
             });
         });
     }
     if (e === null || e === void 0 ? void 0 : e.toString().match("l")) { ///l アプリ名のみ
         windows.forEach((item) => {
             console.log({
-                appName: item.appName,
+                appName: item.appName(),
             });
         });
     }
@@ -202,9 +202,9 @@ function captureOneShot() {
     }
     (_b = (_a = configObj === null || configObj === void 0 ? void 0 : configObj.TARGET_WINDOW) === null || _a === void 0 ? void 0 : _a.ONE_SHOT) === null || _b === void 0 ? void 0 : _b.forEach((tg_window) => {
         windows.forEach((item, i) => {
-            if (item.appName == tg_window) {
+            if (item.appName() == tg_window) {
                 let image = item.captureImageSync();
-                let filename = `${__dirname}/pix/${item.appName}_${date.toLocaleString().replace(/\//g, "_").replace(/:/g, "_")} ${i}.png`;
+                let filename = `${__dirname}/pix/${item.appName()}_${date.toLocaleString().replace(/\//g, "_").replace(/:/g, "_")} ${i}.png`;
                 if (!fs.existsSync(`${__dirname}/pix`)) {
                     fs.mkdirSync(`${__dirname}/pix`);
                 }

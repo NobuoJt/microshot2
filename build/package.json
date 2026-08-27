@@ -1,11 +1,11 @@
 {
     "name": "microshot",
-    "version": "2.0.8_c",
+    "version": "2.0.9_d",
     "description": "Take some screen shot. and detect difference.",
     "main": "index.js",
     "scripts": {
         "start": "npm run build:live",
-        "build:live": "nodemon --watch 'index.ts' --exec \"ts-node\" index.ts & tsc -p .",
+        "build:live": "nodemon --watch 'index.ts' --exec \"tsx\" index.ts & tsc -p .",
         "build_j": "tsc -p .",
         "build_i": "\".\\node_modules\\.bin\\esbuild\" --bundle build/index.js --outfile=build/index_integrated.js --platform=node --external:*.node",
         "build_e": "powershell -c build\\compile_exe.ps1",
@@ -27,11 +27,10 @@
         "node-global-key-listener": "^0.3.0",
         "node-screenshots": "^0.2.8",
         "nodemon": "^3.1.14",
-        "sharp": "^0.35.4",
-        "ts-node": "^10.9.2",
-        "typescript": "^7.0.2"
+        "sharp": "^0.35.4"
     },
     "devDependencies": {
-        "tsx": "^4.23.12"
+        "tsx": "^4.23.12",
+        "typescript": "^6.0.3"
     }
 }

@@ -111,26 +111,26 @@ stdin.addListener("data",(e)=>{
     if (e?.toString().match("L")){///L ウィンドウリストの表示
         windows.forEach((item:any) => {
             console.table({
-                id: item.id,
-                appName: item.appName,
-                title: item.title,
-                currentMonitor: item.currentMonitor.id,
-                x: item.x,
-                y: item.y,
-                width: item.width,
-                height: item.height,
-                //rotation: item.rotation,
-                //scaleFactor: item.scaleFactor,
-                //isPrimary: item.isPrimary,
-                isMinimized: item.isMinimized,
-                isMaximized: item.isMaximized,
+                id: item.id(),
+                appName: item.appName(),
+                title: item.title(),
+                currentMonitor: item.currentMonitor().id,
+                x: item.x(),
+                y: item.y(),
+                width: item.width(),
+                height: item.height(),
+                //rotation: item.rotation(),
+                //scaleFactor: item.scaleFactor(),
+                //isPrimary: item.isPrimary(),
+                isMinimized: item.isMinimized(),
+                isMaximized: item.isMaximized(),
             });
         });
     }
     if (e?.toString().match("l")){///l アプリ名のみ
         windows.forEach((item:any) => {
             console.log({
-                appName: item.appName,
+                appName: item.appName(),
             });
         });
     }
@@ -161,9 +161,9 @@ function captureOneShot() {
     if (!screenshotsAvailable) { console.error(lc.red("Capture skipped: node-screenshots not available.")); return }
     configObj?.TARGET_WINDOW?.ONE_SHOT?.forEach((tg_window) => {
         windows.forEach((item: any, i: Number) => {
-            if (item.appName == tg_window) {
+            if (item.appName() == tg_window) {
                 let image = item.captureImageSync()
-                let filename = `${__dirname}/pix/${item.appName}_${date.toLocaleString().replace(/\//g, "_").replace(/:/g, "_")} ${i}.png`
+                let filename = `${__dirname}/pix/${item.appName()}_${date.toLocaleString().replace(/\//g, "_").replace(/:/g, "_")} ${i}.png`
                 if (!fs.existsSync(`${__dirname}/pix`)) { fs.mkdirSync(`${__dirname}/pix`) }
                 fs.writeFileSync(filename, image.toPngSync());//pix以下に保存
                 console.log("saved " + filename)
