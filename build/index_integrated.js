@@ -13,7 +13,7 @@ var require_package = __commonJS({
   "build/package.json"(exports2, module2) {
     module2.exports = {
       name: "microshot",
-      version: "2.0.11_f",
+      version: "2.0.12_g",
       description: "Take some screen shot. and detect difference.",
       main: "index.js",
       scripts: {
@@ -328,15 +328,39 @@ try {
 var GlobalKeyboardListener;
 var globalHookAvailable = false;
 try {
-  GlobalKeyboardListener = requireFromDisk(__dirname + "\\node_modules\\node-global-key-listener\\build\\index.js");
+  const globalKeyboardListenerModulePaths = [
+    path.join(__dirname, "node_modules", "node-global-key-listener"),
+    // １：このスクリプトのディレクトリ内のnode_modules
+    path.join(process.cwd(), "node_modules", "node-global-key-listener"),
+    // ２：実行ディレクトリのnode_modules
+    path.join(__dirname, "..", "node_modules", "node-global-key-listener")
+    // ３：このスクリプトの親ディレクトリのnode_modules
+  ];
+  const globalKeyboardListenerModulePath = globalKeyboardListenerModulePaths.find((candidate) => fs.existsSync(candidate));
+  if (!globalKeyboardListenerModulePath) {
+    throw new Error("node-global-key-listener module not found");
+  }
+  GlobalKeyboardListener = requireFromDisk(globalKeyboardListenerModulePath);
   globalHookAvailable = true;
 } catch (err) {
   console.warn(console_log_colors_1.default.yellow("Global keyboard hook module not available, falling back to CLI input."));
 }
-var looksSame = void 0;
+var looksSame;
 var looksSameAvailable = false;
 try {
-  looksSame = requireFromDisk(__dirname + "\\node_modules\\looks-same\\index.js");
+  const looksSameModulePaths = [
+    path.join(__dirname, "node_modules", "looks-same"),
+    // １：このスクリプトのディレクトリ内のnode_modules
+    path.join(process.cwd(), "node_modules", "looks-same"),
+    // ２：実行ディレクトリのnode_modules
+    path.join(__dirname, "..", "node_modules", "looks-same")
+    // ３：このスクリプトの親ディレクトリのnode_modules
+  ];
+  const looksSameModulePath = looksSameModulePaths.find((candidate) => fs.existsSync(candidate));
+  if (!looksSameModulePath) {
+    throw new Error("looks-same module not found");
+  }
+  looksSame = requireFromDisk(looksSameModulePath);
   looksSameAvailable = true;
 } catch (err) {
   console.warn(console_log_colors_1.default.yellow("looks-same not available \u2014 diff notification disabled."));
@@ -530,7 +554,7 @@ setInterval(() => __awaiter(void 0, void 0, void 0, function* () {
             console.error("Error running looks-same:", err);
             return;
           }
-          console.log(`result:${result === null || result === void 0 ? void 0 : result.equal} metaInfo:${result === null || result === void 0 ? void 0 : result.metaInfo} diffBounds:${result === null || result === void 0 ? void 0 : result.diffBounds} diffClusters:${result === null || result === void 0 ? void 0 : result.diffClusters} `);
+          console.log(`result:${result === null || result === void 0 ? void 0 : result.equal} diffBounds:${result === null || result === void 0 ? void 0 : result.diffBounds} diffClusters:${result === null || result === void 0 ? void 0 : result.diffClusters} `);
           if (false === (result === null || result === void 0 ? void 0 : result.equal)) {
             try {
               const formData = new FormData();

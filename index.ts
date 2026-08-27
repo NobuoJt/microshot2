@@ -7,9 +7,11 @@ import packageJson from "./package.json"
 import { stdin } from "process";
 import lc from "console-log-colors"
 
+
+
 type ScreenshotsModule = typeof import('node-screenshots');        // node-screenshotsの型
 type ScreenshotWindow = InstanceType<ScreenshotsModule['Window']>; // Windowクラスのインスタンス型
-let screenshots: ScreenshotsModule | undefined;                    // node-screenshotsモジュールのインスタンスを格納する変数
+let screenshots: ScreenshotsModule;                    // node-screenshotsモジュールのインスタンスを格納する変数
 let screenshotsAvailable = false;
 try {
     const screenshotModulePaths = [ // node-screenshotsのモジュールパスを複数候補として指定
@@ -26,19 +28,35 @@ try {
 }
 
 //import { GlobalKeyboardListener } from 'node-global-key-listener';
-let GlobalKeyboardListener: any;
+type GlobalKeyboardListenerModule = typeof import('node-global-key-listener'); // node-global-key-listenerの型
+let GlobalKeyboardListener: GlobalKeyboardListenerModule; // node-global-key-listenerモジュールのインスタンスを格納する変数
 let globalHookAvailable = false;
 try {
-    GlobalKeyboardListener = requireFromDisk(__dirname+'\\node_modules\\node-global-key-listener\\build\\index.js');
+    const globalKeyboardListenerModulePaths = [ // node-global-key-listenerのモジュールパスを複数候補として指定
+        path.join(__dirname, 'node_modules', 'node-global-key-listener'),           // １：このスクリプトのディレクトリ内のnode_modules
+        path.join(process.cwd(), 'node_modules', 'node-global-key-listener'),       // ２：実行ディレクトリのnode_modules
+        path.join(__dirname, '..', 'node_modules', 'node-global-key-listener'),     // ３：このスクリプトの親ディレクトリのnode_modules
+    ];
+    const globalKeyboardListenerModulePath = globalKeyboardListenerModulePaths.find((candidate) => fs.existsSync(candidate)); // 最初の存在するパスを取得
+    if (!globalKeyboardListenerModulePath) { throw new Error('node-global-key-listener module not found'); }
+    GlobalKeyboardListener = requireFromDisk(globalKeyboardListenerModulePath);
     globalHookAvailable = true;
 } catch (err) {
     console.warn(lc.yellow("Global keyboard hook module not available, falling back to CLI input."));
 }
 //import looksSame from 'looks-same';
-let looksSame: any = undefined;
+type LooksSameModule = typeof import('looks-same'); // looks-sameの型
+let looksSame: LooksSameModule; // looks-sameモジュールのインスタンスを格納する変数
 let looksSameAvailable = false;
 try {
-    looksSame = requireFromDisk(__dirname+'\\node_modules\\looks-same\\index.js');
+    const looksSameModulePaths = [ // looks-sameのモジュールパスを複数候補として指定
+        path.join(__dirname, 'node_modules', 'looks-same'),           // １：このスクリプトのディレクトリ内のnode_modules
+        path.join(process.cwd(), 'node_modules', 'looks-same'),       // ２：実行ディレクトリのnode_modules
+        path.join(__dirname, '..', 'node_modules', 'looks-same'),     // ３：このスクリプトの親ディレクトリのnode_modules
+    ];
+    const looksSameModulePath = looksSameModulePaths.find((candidate) => fs.existsSync(candidate)); // 最初の存在するパスを取得
+    if (!looksSameModulePath) { throw new Error('looks-same module not found'); }
+    looksSame = requireFromDisk(looksSameModulePath);
     looksSameAvailable = true;
 } catch (err) {
     console.warn(lc.yellow("looks-same not available — diff notification disabled."));
@@ -104,7 +122,7 @@ if (globalHookAvailable) {
         keyboard = undefined;
     } else {
         try {
-            keyboard = new GlobalKeyboardListener.GlobalKeyboardListener();
+            keyboard = new GlobalKeyboardListener!.GlobalKeyboardListener();
         } catch (err) {
             console.warn(lc.yellow("Failed to initialize global keyboard hook, falling back to CLI input."));
             globalHookAvailable = false;
@@ -238,7 +256,7 @@ setInterval(async () => {
                         console.error("Error running looks-same:", err)
                         return
                     }
-                    console.log(""+`result:${result?.equal} metaInfo:${result?.metaInfo} diffBounds:${result?.diffBounds} diffClusters:${result?.diffClusters} `)
+                    console.log(""+`result:${result?.equal} diffBounds:${result?.diffBounds} diffClusters:${result?.diffClusters} `)
                     
                     if(false===result?.equal){
                         try{

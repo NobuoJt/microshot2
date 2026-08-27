@@ -71,21 +71,37 @@ try {
 catch (err) {
     console.warn(console_log_colors_1.default.yellow("node-screenshots not available — capture features disabled."));
 }
-//import { GlobalKeyboardListener } from 'node-global-key-listener';
-let GlobalKeyboardListener;
+let GlobalKeyboardListener; // node-global-key-listenerモジュールのインスタンスを格納する変数
 let globalHookAvailable = false;
 try {
-    GlobalKeyboardListener = requireFromDisk(__dirname + '\\node_modules\\node-global-key-listener\\build\\index.js');
+    const globalKeyboardListenerModulePaths = [
+        path.join(__dirname, 'node_modules', 'node-global-key-listener'), // １：このスクリプトのディレクトリ内のnode_modules
+        path.join(process.cwd(), 'node_modules', 'node-global-key-listener'), // ２：実行ディレクトリのnode_modules
+        path.join(__dirname, '..', 'node_modules', 'node-global-key-listener'), // ３：このスクリプトの親ディレクトリのnode_modules
+    ];
+    const globalKeyboardListenerModulePath = globalKeyboardListenerModulePaths.find((candidate) => fs.existsSync(candidate)); // 最初の存在するパスを取得
+    if (!globalKeyboardListenerModulePath) {
+        throw new Error('node-global-key-listener module not found');
+    }
+    GlobalKeyboardListener = requireFromDisk(globalKeyboardListenerModulePath);
     globalHookAvailable = true;
 }
 catch (err) {
     console.warn(console_log_colors_1.default.yellow("Global keyboard hook module not available, falling back to CLI input."));
 }
-//import looksSame from 'looks-same';
-let looksSame = undefined;
+let looksSame; // looks-sameモジュールのインスタンスを格納する変数
 let looksSameAvailable = false;
 try {
-    looksSame = requireFromDisk(__dirname + '\\node_modules\\looks-same\\index.js');
+    const looksSameModulePaths = [
+        path.join(__dirname, 'node_modules', 'looks-same'), // １：このスクリプトのディレクトリ内のnode_modules
+        path.join(process.cwd(), 'node_modules', 'looks-same'), // ２：実行ディレクトリのnode_modules
+        path.join(__dirname, '..', 'node_modules', 'looks-same'), // ３：このスクリプトの親ディレクトリのnode_modules
+    ];
+    const looksSameModulePath = looksSameModulePaths.find((candidate) => fs.existsSync(candidate)); // 最初の存在するパスを取得
+    if (!looksSameModulePath) {
+        throw new Error('looks-same module not found');
+    }
+    looksSame = requireFromDisk(looksSameModulePath);
     looksSameAvailable = true;
 }
 catch (err) {
@@ -292,7 +308,7 @@ setInterval(() => __awaiter(void 0, void 0, void 0, function* () {
                         console.error("Error running looks-same:", err);
                         return;
                     }
-                    console.log("" + `result:${result === null || result === void 0 ? void 0 : result.equal} metaInfo:${result === null || result === void 0 ? void 0 : result.metaInfo} diffBounds:${result === null || result === void 0 ? void 0 : result.diffBounds} diffClusters:${result === null || result === void 0 ? void 0 : result.diffClusters} `);
+                    console.log("" + `result:${result === null || result === void 0 ? void 0 : result.equal} diffBounds:${result === null || result === void 0 ? void 0 : result.diffBounds} diffClusters:${result === null || result === void 0 ? void 0 : result.diffClusters} `);
                     if (false === (result === null || result === void 0 ? void 0 : result.equal)) {
                         try {
                             const formData = new FormData();
