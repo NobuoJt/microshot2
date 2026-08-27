@@ -1,7 +1,11 @@
 "use strict";
 var __getOwnPropNames = Object.getOwnPropertyNames;
 var __commonJS = (cb, mod) => function __require() {
-  return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+  try {
+    return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+  } catch (e) {
+    throw mod = 0, e;
+  }
 };
 
 // build/package.json
@@ -27,21 +31,21 @@ var require_package = __commonJS({
       author: "nobuoJT",
       license: "ISC",
       dependencies: {
-        "@esbuild/win32-x64": "^0.25.4",
-        "@types/node": "^22.13.14",
+        "@esbuild/win32-x64": "^0.28.2",
+        "@types/node": "^26.4.0",
         "console-log-colors": "^0.5.0",
-        esbuild: "^0.25.3",
+        esbuild: "^0.28.2",
         "license-checker": "^25.0.1",
-        "looks-same": "^9.0.1",
+        "looks-same": "^10.0.1",
         "node-global-key-listener": "^0.3.0",
-        "node-screenshots": "^0.2.1",
-        nodemon: "^3.1.9",
-        sharp: "^0.34.5",
+        "node-screenshots": "^0.2.8",
+        nodemon: "^3.1.14",
+        sharp: "^0.35.4",
         "ts-node": "^10.9.2",
-        typescript: "^5.8.2"
+        typescript: "^7.0.2"
       },
       devDependencies: {
-        tsx: "^4.21.0"
+        tsx: "^4.23.12"
       }
     };
   }
