@@ -1,6 +1,6 @@
 # microShot2 : screen shot tool
 
-v2.0.12_g
+v2.1.1_i
 
 オフフォーカス、1keyでウィンドウのスクショ画像を撮影します。
 
@@ -31,15 +31,23 @@ pnpm start
 
 ### `l` — Show window list (summary)
 
-- ウィンドウの一覧（要約）を表示します。
+- ウィンドウの一覧（要約）を表示します。`.secret.json` の `ONE_SHOT` または `AUTO` に該当するウィンドウは `★` と対象名で強調します。
 
 ### `L` — Show window list (detail)
 
-- アプリ名リストを表示します。
+- アプリ名リストを表示します。該当する設定対象は `★` と `ONE_SHOT` / `AUTO` で強調します。
 
 ### `r` — Reload
 
-- `.secret.json` を再読み込みして再初期化します。
+- `.secret.json` を再読み込みして再初期化し、パスと内容を表示します。
+
+### `v` — View configuration
+
+- 使用中の `.secret.json` のパスと内容を表示します。
+
+### `e` — Edit configuration
+
+- 使用中の `.secret.json` を既定のアプリケーションで開きます。
 
 ### `c` / `capture` — One shot capture
 
@@ -74,7 +82,7 @@ pnpm start
 
 ```json
 {
-    "DISCORD_POST_URL": "https://discord.com/api/webhooks/{ほげほげ}",
+    "WEBHOOK_POST_URL": "https://discord.com/api/webhooks/{ほげほげ}",
     "TARGET_WINDOW": {
         "ONE_SHOT": ["エクスプローラー"],
         "AUTO": ["エクスプローラー"]
@@ -85,7 +93,7 @@ pnpm start
 
 | Entry | Desc. |
 | ---: | :--- |
-| DISCORD_POST_URL | WebHook を発火させる URL |
+| WEBHOOK_POST_URL | WebHook を発火させる URL |
 | TARGET_WINDOW / ONE_SHOT | スクショ対象ウィンドウ名 (List) |
 | TARGET_WINDOW / AUTO | diff notice 対象ウィンドウ名 (List) |
 

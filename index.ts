@@ -51,17 +51,29 @@ const version=packageJson.version
 
 let prevImage=new Map();
 
-interface config {"DISCORD_POST_URL":string,"TARGET_WINDOW":{"ONE_SHOT":string[],"AUTO":string[]},"TOLERANCE":number}
+interface config {"WEBHOOK_POST_URL":string,"TARGET_WINDOW":{"ONE_SHOT":string[],"AUTO":string[]},"TOLERANCE":number}
 
 let configObj: config; // Configuration will be initialized in the load() function
 let URL:string
+let configPath = ""
+
+function showConfigInfo() {
+    console.log(lc.blue(`.secret.json path: ${configPath}`))
+    try {
+        console.log(readFileSync(configPath, 'utf-8'))
+    } catch (err) {
+        console.error(lc.red(`Failed to read ${configPath}: ${err}`))
+    }
+}
+
 load()
 
 function load(){
     console.log(lc.yellowBG(" ")+lc.italic(` microShot v${version} `+lc.yellowBG(" "))+lc.gray(" nobuoJT"))
     console.log(lc.blue("\n (On console) Key input "))
     console.log(lc.green("'l'")+" : print window List. "+ lc.green("'L'")+" : print window table.")
-    console.log(lc.green("'r'")+" : reload .secret.json and reInit")
+    console.log(lc.green("'v'")+" : show .secret.json path and content. "+lc.green("'e'")+" : open .secret.json.")
+    console.log(lc.green("'r'")+" : reload .secret.json, show path/content and reInit")
     console.log(lc.green("'c'")+" : Capture.")
     console.log(lc.green("'on'")+" : start auto diff."+lc.green("'off'")+" : stop.")
     console.log(lc.green("'exit'")+" : exit.")
@@ -69,14 +81,16 @@ function load(){
     console.log("System Tray menu: "+lc.yellow("Capture / Start / Stop / Exit"))
     console.log(lc.green("Ctrl+Alt+PrintScreen")+" : Capture. "+lc.green("Ctrl+Alt+F10")+" : start. "+lc.green("Ctrl+Alt+F9")+" : stop.")
     console.log("")
-    const configPath = [
+    const foundConfigPath = [
         path.join(__dirname, '.secret.json'),     // １：カレントディレクトリ
         path.join(process.cwd(), '.secret.json'), // ２：実行ディレクトリ
         path.join(__dirname, '..', '.secret.json'), // ３：親ディレクトリ
     ].find((candidate) => fs.existsSync(candidate)); // 最初の存在するパスを取得
-    if (!configPath) { throw new Error('Could not find .secret.json'); }
+    if (!foundConfigPath) { throw new Error('Could not find .secret.json'); }
+    configPath = foundConfigPath
     configObj = JSON.parse(readFileSync(configPath, 'utf-8')); // Initialize configuration
-    URL=configObj?.DISCORD_POST_URL
+    URL=configObj?.WEBHOOK_POST_URL
+    showConfigInfo()
 }
 
 
@@ -102,16 +116,40 @@ if (screenshotsAvailable) {
 }
 let auto_diff_flag=false
 
+function windowTargetLabels(item: ScreenshotWindow) {
+    const appName = windowValue<string>(item, 'appName')
+    const oneShot = configObj?.TARGET_WINDOW?.ONE_SHOT?.includes(appName)
+    const auto = configObj?.TARGET_WINDOW?.AUTO?.includes(appName)
+    const labels: string[] = []
+    if (oneShot) { labels.push('ONE_SHOT') }
+    if (auto) { labels.push('AUTO') }
+    return labels
+}
+
+function windowDisplayName(item: ScreenshotWindow) {
+    const appName = windowValue<string>(item, 'appName')
+    const labels = windowTargetLabels(item)
+    return labels.length > 0 ? `★ ${appName} [${labels.join(', ')}]` : appName
+}
+
+function openConfigFile() {
+    const opener = process.platform === 'win32' ? 'cmd.exe' : process.platform === 'darwin' ? 'open' : 'xdg-open'
+    const args = process.platform === 'win32' ? ['/c', 'start', '', configPath] : [configPath]
+    spawn(opener, args, { detached: true, stdio: 'ignore' }).unref()
+    console.log(`Opening ${configPath}`)
+}
+
 
 //説明
 
 //標準入力割り込み
-stdin.addListener("data",(e)=>{
-    if (e?.toString().match("L")){///L ウィンドウリストの表示
+function handleConsoleCommand(command: string) {
+    if (command === "L"){///L ウィンドウリストの表示
         windows.forEach((item: ScreenshotWindow) => { // ウィンドウのプロパティを取得して表示
             console.table({
                 id: windowValue<number>(item, 'id'),
-                appName: windowValue<string>(item, 'appName'),
+                appName: windowDisplayName(item),
+                configTarget: windowTargetLabels(item).join(', '),
                 title: windowValue<string>(item, 'title'),
                 currentMonitor: windowValue<number>(windowValue<object>(item, 'currentMonitor'), 'id'),
                 x: windowValue<number>(item, 'x'),
@@ -126,32 +164,42 @@ stdin.addListener("data",(e)=>{
             });
         });
     }
-    if (e?.toString().match("l")){///l アプリ名のみ
+    if (command === "l"){///l アプリ名のみ
         windows.forEach((item: ScreenshotWindow) => {
             console.log({
-                appName: windowValue<string>(item, 'appName'),
+                appName: windowDisplayName(item),
             });
         });
     }
-    if (e?.toString().match(/exit/gi)){///exit 終了
+    if (command.toLowerCase() === "exit"){///exit 終了
         console.log('stdin:"exit" detected , exiting...');
         process.exit();
     }
-    if (e?.toString().match(/r/gi)){//reload .secret
+    if (command.toLowerCase() === "r"){ // reload .secret
         load()
         console.log(".secret.json reloaded")
     }
+    if (command.toLowerCase() === "v") { // view .secret path and content
+        showConfigInfo()
+    }
+    if (command.toLowerCase() === "e") { // edit .secret
+        openConfigFile()
+    }
     // CLI commands (always enabled)
-    if (e?.toString().match(/^\s*c\s*$/i) || e?.toString().match(/^\s*capture\s*$/i)){
+    if (/^(c|capture)$/i.test(command)){
         captureOneShot()
     }
-    if (e?.toString().match(/^\s*(on|start|F10)\s*$/i)){
+    if (/^(on|start|F10)$/i.test(command)){
         startAutoDiff()
     }
-    if (e?.toString().match(/^\s*(off|stop|F9)\s*$/i)){
+    if (/^(off|stop|F9)$/i.test(command)){
         stopAutoDiff()
     }
-    //console.log(e?.toString())
+    //console.log(command)
+}
+
+stdin.addListener("data", (e) => {
+    e?.toString().split(/\r?\n/).map((line) => line.trim()).filter(Boolean).forEach(handleConsoleCommand)
 });
 
 //キーボードイベント割り込み(フォーカス無視)

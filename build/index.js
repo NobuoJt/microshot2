@@ -94,26 +94,42 @@ const version = package_json_1.default.version;
 let prevImage = new Map();
 let configObj; // Configuration will be initialized in the load() function
 let URL;
+let configPath = "";
+function showConfigInfo() {
+    console.log(console_log_colors_1.default.blue(`.secret.json path: ${configPath}`));
+    try {
+        console.log((0, fs_1.readFileSync)(configPath, 'utf-8'));
+    }
+    catch (err) {
+        console.error(console_log_colors_1.default.red(`Failed to read ${configPath}: ${err}`));
+    }
+}
 load();
 function load() {
     console.log(console_log_colors_1.default.yellowBG(" ") + console_log_colors_1.default.italic(` microShot v${version} ` + console_log_colors_1.default.yellowBG(" ")) + console_log_colors_1.default.gray(" nobuoJT"));
     console.log(console_log_colors_1.default.blue("\n (On console) Key input "));
-    console.log("'l' : print window List.\n'L' : print window table.\n'r' : reload .secret.json and reInit");
-    console.log("'c' : Capture.\n'on' : start auto diff. 'off' : stop.\n'exit' : exit.");
+    console.log(console_log_colors_1.default.green("'l'") + " : print window List. " + console_log_colors_1.default.green("'L'") + " : print window table.");
+    console.log(console_log_colors_1.default.green("'v'") + " : show .secret.json path and content. " + console_log_colors_1.default.green("'e'") + " : open .secret.json.");
+    console.log(console_log_colors_1.default.green("'r'") + " : reload .secret.json, show path/content and reInit");
+    console.log(console_log_colors_1.default.green("'c'") + " : Capture.");
+    console.log(console_log_colors_1.default.green("'on'") + " : start auto diff." + console_log_colors_1.default.green("'off'") + " : stop.");
+    console.log(console_log_colors_1.default.green("'exit'") + " : exit.");
     console.log(console_log_colors_1.default.blue("\n (Tray / Global hotkey) input"));
-    console.log("Tray menu: Capture / Start / Stop / Exit");
-    console.log("Ctrl+Alt+PrintScreen: Capture. Ctrl+Alt+F10: start. Ctrl+Alt+F9: stop.");
+    console.log("System Tray menu: " + console_log_colors_1.default.yellow("Capture / Start / Stop / Exit"));
+    console.log(console_log_colors_1.default.green("Ctrl+Alt+PrintScreen") + " : Capture. " + console_log_colors_1.default.green("Ctrl+Alt+F10") + " : start. " + console_log_colors_1.default.green("Ctrl+Alt+F9") + " : stop.");
     console.log("");
-    const configPath = [
+    const foundConfigPath = [
         path.join(__dirname, '.secret.json'), // １：カレントディレクトリ
         path.join(process.cwd(), '.secret.json'), // ２：実行ディレクトリ
         path.join(__dirname, '..', '.secret.json'), // ３：親ディレクトリ
     ].find((candidate) => fs.existsSync(candidate)); // 最初の存在するパスを取得
-    if (!configPath) {
+    if (!foundConfigPath) {
         throw new Error('Could not find .secret.json');
     }
+    configPath = foundConfigPath;
     configObj = JSON.parse((0, fs_1.readFileSync)(configPath, 'utf-8')); // Initialize configuration
-    URL = configObj === null || configObj === void 0 ? void 0 : configObj.DISCORD_POST_URL;
+    URL = configObj === null || configObj === void 0 ? void 0 : configObj.WEBHOOK_POST_URL;
+    showConfigInfo();
 }
 let windows = []; // ウィンドウの配列
 /*** ウィンドウのプロパティを取得する */
@@ -135,14 +151,40 @@ else {
     windows = [];
 }
 let auto_diff_flag = false;
+function windowTargetLabels(item) {
+    var _a, _b, _c, _d;
+    const appName = windowValue(item, 'appName');
+    const oneShot = (_b = (_a = configObj === null || configObj === void 0 ? void 0 : configObj.TARGET_WINDOW) === null || _a === void 0 ? void 0 : _a.ONE_SHOT) === null || _b === void 0 ? void 0 : _b.includes(appName);
+    const auto = (_d = (_c = configObj === null || configObj === void 0 ? void 0 : configObj.TARGET_WINDOW) === null || _c === void 0 ? void 0 : _c.AUTO) === null || _d === void 0 ? void 0 : _d.includes(appName);
+    const labels = [];
+    if (oneShot) {
+        labels.push('ONE_SHOT');
+    }
+    if (auto) {
+        labels.push('AUTO');
+    }
+    return labels;
+}
+function windowDisplayName(item) {
+    const appName = windowValue(item, 'appName');
+    const labels = windowTargetLabels(item);
+    return labels.length > 0 ? `★ ${appName} [${labels.join(', ')}]` : appName;
+}
+function openConfigFile() {
+    const opener = process.platform === 'win32' ? 'cmd.exe' : process.platform === 'darwin' ? 'open' : 'xdg-open';
+    const args = process.platform === 'win32' ? ['/c', 'start', '', configPath] : [configPath];
+    (0, child_process_1.spawn)(opener, args, { detached: true, stdio: 'ignore' }).unref();
+    console.log(`Opening ${configPath}`);
+}
 //説明
 //標準入力割り込み
-process_1.stdin.addListener("data", (e) => {
-    if (e === null || e === void 0 ? void 0 : e.toString().match("L")) { ///L ウィンドウリストの表示
+function handleConsoleCommand(command) {
+    if (command === "L") { ///L ウィンドウリストの表示
         windows.forEach((item) => {
             console.table({
                 id: windowValue(item, 'id'),
-                appName: windowValue(item, 'appName'),
+                appName: windowDisplayName(item),
+                configTarget: windowTargetLabels(item).join(', '),
                 title: windowValue(item, 'title'),
                 currentMonitor: windowValue(windowValue(item, 'currentMonitor'), 'id'),
                 x: windowValue(item, 'x'),
@@ -157,32 +199,41 @@ process_1.stdin.addListener("data", (e) => {
             });
         });
     }
-    if (e === null || e === void 0 ? void 0 : e.toString().match("l")) { ///l アプリ名のみ
+    if (command === "l") { ///l アプリ名のみ
         windows.forEach((item) => {
             console.log({
-                appName: windowValue(item, 'appName'),
+                appName: windowDisplayName(item),
             });
         });
     }
-    if (e === null || e === void 0 ? void 0 : e.toString().match(/exit/gi)) { ///exit 終了
+    if (command.toLowerCase() === "exit") { ///exit 終了
         console.log('stdin:"exit" detected , exiting...');
         process.exit();
     }
-    if (e === null || e === void 0 ? void 0 : e.toString().match(/r/gi)) { //reload .secret
+    if (command.toLowerCase() === "r") { // reload .secret
         load();
         console.log(".secret.json reloaded");
     }
+    if (command.toLowerCase() === "v") { // view .secret path and content
+        showConfigInfo();
+    }
+    if (command.toLowerCase() === "e") { // edit .secret
+        openConfigFile();
+    }
     // CLI commands (always enabled)
-    if ((e === null || e === void 0 ? void 0 : e.toString().match(/^\s*c\s*$/i)) || (e === null || e === void 0 ? void 0 : e.toString().match(/^\s*capture\s*$/i))) {
+    if (/^(c|capture)$/i.test(command)) {
         captureOneShot();
     }
-    if (e === null || e === void 0 ? void 0 : e.toString().match(/^\s*(on|start|F10)\s*$/i)) {
+    if (/^(on|start|F10)$/i.test(command)) {
         startAutoDiff();
     }
-    if (e === null || e === void 0 ? void 0 : e.toString().match(/^\s*(off|stop|F9)\s*$/i)) {
+    if (/^(off|stop|F9)$/i.test(command)) {
         stopAutoDiff();
     }
-    //console.log(e?.toString())
+    //console.log(command)
+}
+process_1.stdin.addListener("data", (e) => {
+    e === null || e === void 0 ? void 0 : e.toString().split(/\r?\n/).map((line) => line.trim()).filter(Boolean).forEach(handleConsoleCommand);
 });
 //キーボードイベント割り込み(フォーカス無視)
 function captureOneShot() {
