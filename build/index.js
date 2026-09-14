@@ -52,6 +52,7 @@ const path = __importStar(require("path"));
 const requireFromDisk = (0, module_1.createRequire)(__filename);
 const package_json_1 = __importDefault(require("./package.json"));
 const process_1 = require("process");
+const child_process_1 = require("child_process");
 const console_log_colors_1 = __importDefault(require("console-log-colors"));
 let screenshots; // node-screenshotsモジュールのインスタンスを格納する変数
 let screenshotsAvailable = false;
@@ -70,24 +71,6 @@ try {
 }
 catch (err) {
     console.warn(console_log_colors_1.default.yellow("node-screenshots not available — capture features disabled."));
-}
-let GlobalKeyboardListener; // node-global-key-listenerモジュールのインスタンスを格納する変数
-let globalHookAvailable = false;
-try {
-    const globalKeyboardListenerModulePaths = [
-        path.join(__dirname, 'node_modules', 'node-global-key-listener'), // １：このスクリプトのディレクトリ内のnode_modules
-        path.join(process.cwd(), 'node_modules', 'node-global-key-listener'), // ２：実行ディレクトリのnode_modules
-        path.join(__dirname, '..', 'node_modules', 'node-global-key-listener'), // ３：このスクリプトの親ディレクトリのnode_modules
-    ];
-    const globalKeyboardListenerModulePath = globalKeyboardListenerModulePaths.find((candidate) => fs.existsSync(candidate)); // 最初の存在するパスを取得
-    if (!globalKeyboardListenerModulePath) {
-        throw new Error('node-global-key-listener module not found');
-    }
-    GlobalKeyboardListener = requireFromDisk(globalKeyboardListenerModulePath);
-    globalHookAvailable = true;
-}
-catch (err) {
-    console.warn(console_log_colors_1.default.yellow("Global keyboard hook module not available, falling back to CLI input."));
 }
 let looksSame; // looks-sameモジュールのインスタンスを格納する変数
 let looksSameAvailable = false;
@@ -117,8 +100,9 @@ function load() {
     console.log(console_log_colors_1.default.blue("\n (On console) Key input "));
     console.log("'l' : print window List.\n'L' : print window table.\n'r' : reload .secret.json and reInit");
     console.log("'c' : Capture.\n'on' : start auto diff. 'off' : stop.\n'exit' : exit.");
-    console.log(console_log_colors_1.default.blue("\n (Global) Key input"));
-    console.log("'R Ctrl' : Capture.\n'F10' : start auto diff notice. 'F9' : stop.");
+    console.log(console_log_colors_1.default.blue("\n (Tray / Global hotkey) input"));
+    console.log("Tray menu: Capture / Start / Stop / Exit");
+    console.log("Ctrl+Alt+PrintScreen: Capture. Ctrl+Alt+F10: start. Ctrl+Alt+F9: stop.");
     console.log("");
     const configPath = [
         path.join(__dirname, '.secret.json'), // １：カレントディレクトリ
@@ -150,35 +134,6 @@ if (screenshotsAvailable) {
 else {
     windows = [];
 }
-let keyboard = undefined;
-if (globalHookAvailable) {
-    // Prevent spawn error if native binary was removed by AV or packaging
-    const winKeyExe = path.join(__dirname, 'node_modules', 'node-global-key-listener', 'bin', 'WinKeyServer.exe');
-    if (!fs.existsSync(winKeyExe)) {
-        console.warn(console_log_colors_1.default.yellow(`WinKeyServer.exe not found at ${winKeyExe} — disabling global key hook.`));
-        globalHookAvailable = false;
-        keyboard = undefined;
-    }
-    else {
-        try {
-            keyboard = new GlobalKeyboardListener.GlobalKeyboardListener();
-        }
-        catch (err) {
-            console.warn(console_log_colors_1.default.yellow("Failed to initialize global keyboard hook, falling back to CLI input."));
-            globalHookAvailable = false;
-            keyboard = undefined;
-        }
-    }
-}
-// Catch spawn ENOENT from background native helper and prevent process crash
-process.on('uncaughtException', (err) => {
-    if (err && err.code === 'ENOENT' && typeof err.path === 'string' && err.path.toLowerCase().includes('winkeyserver.exe')) {
-        console.error(console_log_colors_1.default.red(`Ignored missing native helper: ${err.path}`));
-        return;
-    }
-    // rethrow other errors so they are not silently ignored
-    throw err;
-});
 let auto_diff_flag = false;
 //説明
 //標準入力割り込み
@@ -264,24 +219,54 @@ function stopAutoDiff() {
     auto_diff_flag = false;
     console.log("auto_diff_flag=false");
 }
-if (globalHookAvailable && keyboard) {
-    keyboard.addListener((event) => {
-        if (!event) {
-            return;
-        }
-        if (event.name === 'RIGHT CTRL' && event.state === 'DOWN') {
-            captureOneShot();
-        }
-        if (event.name === 'F10' && event.state === 'DOWN') {
-            startAutoDiff();
-        }
-        if (event.name === 'F9' && event.state === 'DOWN') {
-            stopAutoDiff();
-        }
-    });
+let trayProcess;
+if (process.platform === 'win32') {
+    const trayScriptPath = [
+        path.join(__dirname, 'scripts', 'microshot-tray.ps1'),
+        path.join(__dirname, '..', 'scripts', 'microshot-tray.ps1'),
+        path.join(process.cwd(), 'scripts', 'microshot-tray.ps1'),
+    ].find((candidate) => fs.existsSync(candidate));
+    if (trayScriptPath) {
+        const currentTrayProcess = (0, child_process_1.spawn)('powershell.exe', [
+            '-NoProfile',
+            '-STA',
+            '-ExecutionPolicy', 'Bypass',
+            '-File', trayScriptPath,
+        ], { stdio: ['ignore', 'pipe', 'pipe'] });
+        trayProcess = currentTrayProcess;
+        currentTrayProcess.stdout.setEncoding('utf8');
+        currentTrayProcess.stdout.on('data', (data) => {
+            data.split(/\r?\n/).map((command) => command.trim()).filter(Boolean).forEach((command) => {
+                if (command === 'capture') {
+                    captureOneShot();
+                }
+                if (command === 'start') {
+                    startAutoDiff();
+                }
+                if (command === 'stop') {
+                    stopAutoDiff();
+                }
+                if (command === 'exit') {
+                    process.exit(0);
+                }
+            });
+        });
+        currentTrayProcess.stderr.setEncoding('utf8');
+        currentTrayProcess.stderr.on('data', (data) => console.warn(data.trim()));
+        currentTrayProcess.on('error', (err) => console.warn(console_log_colors_1.default.yellow(`Tray helper unavailable: ${err.message}`)));
+        currentTrayProcess.on('close', (code) => {
+            if (code !== 0) {
+                console.warn(console_log_colors_1.default.yellow(`Tray helper exited with code ${code}.`));
+            }
+        });
+        process.on('exit', () => trayProcess === null || trayProcess === void 0 ? void 0 : trayProcess.kill());
+    }
+    else {
+        console.warn(console_log_colors_1.default.yellow('Tray script not found — use CLI commands: capture, start, stop, exit.'));
+    }
 }
 else {
-    console.log(console_log_colors_1.default.yellow("Global keyboard hook not in use — use CLI commands: 'capture', 'auto on', 'auto off', 'exit'."));
+    console.log(console_log_colors_1.default.yellow("Tray and global hotkeys are available on Windows only — use CLI commands: 'capture', 'start', 'stop', 'exit'."));
 }
 setInterval(() => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;

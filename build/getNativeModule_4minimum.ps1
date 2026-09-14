@@ -1,6 +1,10 @@
 ﻿# 最小構成でexeを動かすために、includeされないnativeModuleを同包したい。
 # dist/で.exeを実行して、moduleエラーが出たらdist/node_modulesに引っ張ってくる。
 try{
+    # トレイメニューと登録型ホットキーの補助スクリプトを配布物へコピー
+    New-Item -ItemType Directory -Force -Path "dist/scripts" | Out-Null
+    Copy-Item -Path "scripts/microshot-tray.ps1" -Destination "dist/scripts/microshot-tray.ps1" -Force
+
     # 1. dist/node_modules作成
     if (-not (Test-Path "dist/node_modules")) {
         New-Item -ItemType Directory -Path "dist/node_modules" | Out-Null

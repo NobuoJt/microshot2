@@ -57,15 +57,18 @@ pnpm start
 
 - プログラムを終了します。
 
-## Key (Global)
+## Tray / Global hotkey
 
-フォーカスに関係なく受け付けるキー操作です（利用可能な場合）。
+コンソールにフォーカスがない場合も、タスクトレイメニューまたは登録型ホットキーで操作できます。
 
-- `Right Ctrl` — One shot capture
-- `F10` — Start auto diff notice
-- `F9` — Stop diff notice
+- トレイメニュー `Capture` — One shot capture
+- トレイメニュー `Start auto diff` — Start auto diff notice
+- トレイメニュー `Stop auto diff` — Stop diff notice
+- `Ctrl+Alt+PrintScreen` — One shot capture
+- `Ctrl+Alt+F10` — Start auto diff notice
+- `Ctrl+Alt+F9` — Stop diff notice
 
-注意: グローバルキーフックは `node-global-key-listener` とそのネイティブヘルパー (`WinKeyServer.exe`) に依存します。配布物にネイティブバイナリが含まれていない、またはアンチウイルスによってバイナリが削除された場合でも、アプリは落ちずにコンソールコマンドへフォールバックします。
+登録型ホットキーは指定した組み合わせだけを受け取ります。全キーフック用の `node-global-key-listener` や `WinKeyServer.exe` は使用しません。
 
 ## `.secret.json` の書き方
 
@@ -89,7 +92,7 @@ pnpm start
 ## 実行時の注意 / モジュール互換性
 
 - `node-screenshots`（スクリーンキャプチャ）や `looks-same`（差分判定）はネイティブ依存（例: `sharp`）を含みます。これらが正しくインストール/ビルドされていない場合、キャプチャや差分通知機能は無効化され、ログを出力して処理は継続します。
-- `node-global-key-listener` のネイティブヘルパー（`WinKeyServer.exe`）が欠落している場合も、グローバルキーフックは自動的に無効化され、コンソールコマンドでの操作にフォールバックします。
+- Windowsではトレイメニューと登録型ホットキーをPowerShell補助プロセスで提供します。補助プロセスが起動できない場合は、コンソールコマンドで操作できます。
 
 必要であれば配布にネイティブバイナリを同梱するか、AV 側に誤検出レポートを提出してください。
 
@@ -147,6 +150,8 @@ build/                  中間ファイル・ビルド定義
     index_integrated.js   esbuild によりバインドされた cjs
     package*.json         コピー
     sea-config.json       Node-SEA で EXE 化するための設定
+scripts/
+    microshot-tray.ps1    トレイメニューと登録型ホットキーの補助スクリプト
 ```
 
 ## ライセンス関連
