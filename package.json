@@ -26,10 +26,10 @@
     "looks-same": "^10.0.1",
     "node-screenshots": "^0.2.8",
     "nodemon": "^3.1.14",
-    "sharp": "^0.35.4"
+    "sharp": "^0.35.5"
   },
   "devDependencies": {
     "tsx": "^4.23.12",
-    "typescript": "^6.0.3"
+    "typescript": "^7.0.2"
   }
 }
